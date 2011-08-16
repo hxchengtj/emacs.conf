@@ -21,6 +21,9 @@
 ;; disable auto save
 (setq auto-save-default nil)
 
+;; ssh
+(require 'ssh)
+
 ;;
 ;; IDO mode
 ;;
