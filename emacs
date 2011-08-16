@@ -107,8 +107,8 @@
 ;;
 ;; org mode
 ;;
-(add-to-list 'load-path "~/.emacs.d/org-7.01h/lisp")
-(add-to-list 'load-path "~/.emacs.d/org-7.01h/contrib/lisp")
+(add-to-list 'load-path "~/.emacs.d/org/lisp")
+(add-to-list 'load-path "~/.emacs.d/org/contrib/lisp")
 (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (setq org-cycle-include-plain-lists t)
