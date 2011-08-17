@@ -8,12 +8,16 @@
 (setq-default fill-column 80)
 (setq split-height-threshold nil)
 ;(setq split-width-threshold nil)
+(setq inhibit-startup-screen t)
 
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
 (load "~/.emacs.d/zenburn.el")
 (color-theme-zenburn)
+
+(show-paren-mode 1)
+(setq show-paren-delay 0)
 
 ;; disable backup
 (setq make-backup-files nil)
@@ -74,35 +78,23 @@
 (autoload 'reftex-citation "reftex-cite" "Make citation" t)
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex) ;; with AucTeX
 (add-hook 'LaTeX-mode-hook 'turn-on-flyspell)
-
-(custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
- '(TeX-output-view-style (quote (("^dvi$" ("^landscape$" "^pstricks$\\|^pst-\\|^psfrag$") "%(o?)dvips -t landscape %d -o && gv %f") ("^dvi$" "^pstricks$\\|^pst-\\|^psfrag$" "%(o?)dvips %d -o && gv %f") ("^dvi$" ("^\\(?:a4\\(?:dutch\\|paper\\|wide\\)\\|sem-a4\\)$" "^landscape$") "%(o?)xdvi %dS -paper a4r -s 0 %d") ("^dvi$" "^\\(?:a4\\(?:dutch\\|paper\\|wide\\)\\|sem-a4\\)$" "%(o?)xdvi %dS -paper a4 %d") ("^dvi$" ("^\\(?:a5\\(?:comb\\|paper\\)\\)$" "^landscape$") "%(o?)xdvi %dS -paper a5r -s 0 %d") ("^dvi$" "^\\(?:a5\\(?:comb\\|paper\\)\\)$" "%(o?)xdvi %dS -paper a5 %d") ("^dvi$" "^b5paper$" "%(o?)xdvi %dS -paper b5 %d") ("^dvi$" "^letterpaper$" "%(o?)xdvi %dS -paper us %d") ("^dvi$" "^legalpaper$" "%(o?)xdvi %dS -paper legal %d") ("^dvi$" "^executivepaper$" "%(o?)xdvi %dS -paper 7.25x10.5in %d") ("^dvi$" "." "%(o?)xdvi %dS %d") ("^pdf$" "." "evince %o %(outpage)") ("^html?$" "." "netscape %o"))))
- '(inhibit-startup-screen t)
- '(org-agenda-files (quote ("~/GTD/gtd.org" "~/GTD/journal.org")))
- '(paren-mode (quote paren) nil (paren))
- '(preview-default-document-pt 12)
- '(preview-scale-function 1.5)
- '(quack-default-program "guile")
- '(quack-fontify-style nil)
- '(quack-programs (quote ("guile-dbg" "bigloo" "csi" "csi -hygienic" "gosh" "gsi" "gsi ~~/syntax-case.scm -" "guile" "kawa" "mit-scheme" "mred -z" "mzscheme" "mzscheme -M errortrace" "mzscheme3m" "mzschemecgc" "rs" "scheme" "scheme48" "scsh" "sisc" "stklos" "sxi")))
- '(show-paren-delay 0)
- '(show-paren-mode t nil (paren)))
-(custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
-; '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 118 :width normal :foundry "unknown" :family "DejaVu Sans Mono"))))
- '(paren-face-match ((((class color)) (:background "green"))))
- '(paren-face-mismatch ((((class color)) (:foreground "white" :background "red"))))
- '(paren-match ((t (:background "green"))))
- '(paren-mismatch ((t (:background "red"))))
- '(show-paren-match ((((class color)) (:background "green"))))
- '(show-paren-mismatch ((((class color)) (:background "red")))))
+(setq TeX-output-view-style
+      (quote
+       (("^dvi$" ("^landscape$" "^pstricks$\\|^pst-\\|^psfrag$") "%(o?)dvips -t landscape %d -o && gv %f")
+	("^dvi$" "^pstricks$\\|^pst-\\|^psfrag$" "%(o?)dvips %d -o && gv %f")
+	("^dvi$" ("^\\(?:a4\\(?:dutch\\|paper\\|wide\\)\\|sem-a4\\)$" "^landscape$") "%(o?)xdvi %dS -paper a4r -s 0 %d")
+	("^dvi$" "^\\(?:a4\\(?:dutch\\|paper\\|wide\\)\\|sem-a4\\)$" "%(o?)xdvi %dS -paper a4 %d")
+	("^dvi$" ("^\\(?:a5\\(?:comb\\|paper\\)\\)$" "^landscape$") "%(o?)xdvi %dS -paper a5r -s 0 %d")
+	("^dvi$" "^\\(?:a5\\(?:comb\\|paper\\)\\)$" "%(o?)xdvi %dS -paper a5 %d")
+	("^dvi$" "^b5paper$" "%(o?)xdvi %dS -paper b5 %d")
+	("^dvi$" "^letterpaper$" "%(o?)xdvi %dS -paper us %d")
+	("^dvi$" "^legalpaper$" "%(o?)xdvi %dS -paper legal %d")
+	("^dvi$" "^executivepaper$" "%(o?)xdvi %dS -paper 7.25x10.5in %d")
+	("^dvi$" "." "%(o?)xdvi %dS %d")
+	("^pdf$" "." "evince %o %(outpage)")
+	("^html?$" "." "netscape %o"))))
+(setq preview-default-document-pt 12)
+(setq preview-scale-function 1.5)
 
 ;;
 ;; org mode
@@ -111,6 +103,7 @@
 (add-to-list 'load-path "~/.emacs.d/org/contrib/lisp")
 (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(setq org-agenda-files (list "~/GTD/gtd.org" "~/GTD/journal.org"))
 (setq org-cycle-include-plain-lists t)
 (setq org-use-fast-todo-selection t)
 (setq org-use-tag-inheritance nil)
