@@ -57,7 +57,7 @@
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
 (custom-set-faces
- '(tooltip ((t (:background "white" :foreground "blue" :foundry "fixed")))))
+ `(tooltip ((t (:background ,zenburn-bg+2 :foreground ,zenburn-yellow :foundry "fixed")))))
 
 ;; AUCTEX
 (add-to-list 'load-path "/usr/share/emacs23/site-lisp")
