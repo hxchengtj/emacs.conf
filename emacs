@@ -3,8 +3,10 @@
 ;;
 (global-font-lock-mode t)
 (setq tab-width 2)
-(add-to-list 'default-frame-alist '(font . "Lucida Console-14"))
+;; (add-to-list 'default-frame-alist '(font . "Lucida Console-12"))
+(add-to-list 'default-frame-alist '(font . "Terminus-12"))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(global-linum-mode t)
 (setq-default fill-column 80)
 (setq split-height-threshold nil)
 ;(setq split-width-threshold nil)
@@ -13,8 +15,10 @@
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
-(load "~/.emacs.d/zenburn.el")
-(color-theme-zenburn)
+;; (load "~/.emacs.d/zenburn.el")
+;; (color-theme-zenburn)
+(load "~/.emacs.d/color-theme-almost-monokai.el")
+(color-theme-almost-monokai)
 
 (show-paren-mode 1)
 (setq show-paren-delay 0)
@@ -61,7 +65,7 @@
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
 (custom-set-faces
- `(tooltip ((t (:background ,zenburn-bg+2 :foreground ,zenburn-yellow :foundry "fixed")))))
+ `(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
 
 ;; AUCTEX
 (add-to-list 'load-path "/usr/share/emacs23/site-lisp")
