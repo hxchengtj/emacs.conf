@@ -233,6 +233,14 @@ table determines which characters these are."
 (global-set-key (kbd "<f9>") (lambda () (interactive) (big-margin-toggle)))
 
 ;;
+;; OCaml
+;;
+(add-to-list 'load-path "~/.emacs.d/tuareg-2.0.4")
+(add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . tuareg-mode))
+(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
+(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
+
+;;
 ;; C++ and C mode...
 ;;
 
@@ -269,7 +277,7 @@ table determines which characters these are."
 (require 'project-root)
 (require 'full-ack)
 (setq ack-executable (executable-find "ack-grep"))
-(global-set-key (kbd "C-f") 'project-root-find-file)
+(global-set-key (kbd "M-f") 'project-root-find-file)
 (global-set-key (kbd "M-g") 'project-root-ack)
 (global-set-key (kbd "M-d") 'project-root-goto-root)
 (global-set-key (kbd "C-c p p") 'project-root-run-default-command)
