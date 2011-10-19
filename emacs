@@ -150,10 +150,11 @@
 (setq user-full-name "Antonio, Fabio Di Narzo")
 
 ;; bbdb
-(add-to-list 'load-path "/usr/share/emacs23/site-lisp/bbdb")
+(add-to-list 'load-path "~/.emacs.d/bbdb")
 (require 'bbdb)
 
 ;; notmuch
+(add-to-list 'load-path "~/.emacs.d/notmuch")
 (setq notmuch-search-authors-width 40)
 (setq notmuch-search-oldest-first nil)
 ;(setq notmuch-command "/export/users/ubuntu/local/bin/notmuch")
