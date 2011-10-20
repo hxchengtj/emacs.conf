@@ -114,6 +114,7 @@
 (setq org-use-fast-todo-selection t)
 (setq org-use-tag-inheritance nil)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
+(add-hook 'org-mode-hook 'linum-mode)
 (setq org-link-abbrev-alist
       '(("PMID" . "http://www.ncbi.nlm.nih.gov/pubmed/")
 	("DOI" . "http://dx.doi.org/")))
