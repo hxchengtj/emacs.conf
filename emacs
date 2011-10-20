@@ -10,6 +10,7 @@
 (global-linum-mode t)
 (column-number-mode t)
 (setq-default fill-column 80)
+(global-visual-line-mode 1)
 (setq split-height-threshold nil)
 ;(setq split-width-threshold nil)
 (setq inhibit-startup-screen t)
