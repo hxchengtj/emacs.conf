@@ -258,10 +258,37 @@ table determines which characters these are."
 ;; eldoc
 (setq HOME (expand-file-name ""))
 (setq GSL-FLAGS (substring (shell-command-to-string "gsl-config --cflags") 0 -1))
-(setq c-eldoc-includes (format "%s -I%s/local/include -I%s/local/src/MCMCBenchmarks/include" GSL-FLAGS HOME HOME))
+(setq R-FLAGS (substring (shell-command-to-string "R CMD config --cppflags") 0 -1))
+(setq c-eldoc-includes (format "%s %s -I%s/local/include -I%s/local/src/MCMCBenchmarks/include" GSL-FLAGS R-FLAGS HOME HOME))
 (load "c-eldoc")
 
 ;; flymake
+(setq flymake-gui-warnings-enabled nil)
+(defun flymake-get-gcc-cmdline (source base-dir)
+  (list "gcc"
+	(append
+	 (list
+	  "-o" "nul"
+	  "-S" source
+	  (concat "-I" base-dir))
+	 (split-string c-eldoc-includes " "))))
+(defun flymake-custom-c-init ()
+  (let* ((args nil)
+	 (source-file-name   buffer-file-name)
+	 (buildfile-dir      (file-name-directory source-file-name)))
+    (if buildfile-dir
+	(let*
+	    ((temp-source-file-name
+	      (flymake-init-create-temp-buffer-copy 'flymake-create-temp-inplace)))
+	  (setq args
+		(flymake-get-syntax-check-program-args
+		 temp-source-file-name buildfile-dir
+		 t t
+		 'flymake-get-gcc-cmdline))))
+    args))
+(require 'flymake)
+(add-to-list 'flymake-allowed-file-name-masks '(".+\\.c$" flymake-custom-c-init))
+
 (defun my-flymake-show-help ()
   (when (get-char-property (point) 'flymake-overlay)
     (let ((help (get-char-property (point) 'help-echo)))
