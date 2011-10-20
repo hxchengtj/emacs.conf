@@ -7,6 +7,7 @@
 (add-to-list 'default-frame-alist '(font . "Terminus-12"))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (global-linum-mode t)
+(column-number-mode t)
 (setq-default fill-column 80)
 (setq split-height-threshold nil)
 ;(setq split-width-threshold nil)
