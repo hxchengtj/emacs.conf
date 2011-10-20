@@ -282,7 +282,7 @@ table determines which characters these are."
 (require 'full-ack)
 (setq ack-executable (executable-find "ack-grep"))
 (global-set-key (kbd "M-f") 'project-root-find-file)
-(global-set-key (kbd "M-g") 'project-root-ack)
+;; (global-set-key (kbd "M-g") 'project-root-ack)
 (global-set-key (kbd "M-d") 'project-root-goto-root)
 (global-set-key (kbd "C-c p p") 'project-root-run-default-command)
 (global-set-key (kbd "M-l") 'project-root-browse-seen-projects)
