@@ -3,9 +3,10 @@
 ;;
 (global-font-lock-mode t)
 (setq tab-width 2)
-(if (<= (x-display-pixel-height) 800)
-    (add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
-  (add-to-list 'default-frame-alist '(font . "Terminus-15")))
+(if window-system
+    (if (<= (x-display-pixel-height) 800)
+	(add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
+      (add-to-list 'default-frame-alist '(font . "Terminus-15"))))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (global-linum-mode t)
 (column-number-mode t)
@@ -18,10 +19,13 @@
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
-;; (load "~/.emacs.d/zenburn.el")
-;; (color-theme-zenburn)
-(load "~/.emacs.d/color-theme-almost-monokai.el")
-(color-theme-almost-monokai)
+(if window-system
+    (progn
+      (load "~/.emacs.d/color-theme-almost-monokai.el")
+      (color-theme-almost-monokai))
+  (progn
+    (load "~/.emacs.d/zenburn.el")
+    (color-theme-zenburn)))
 
 (show-paren-mode 1)
 (setq show-paren-delay 0)
