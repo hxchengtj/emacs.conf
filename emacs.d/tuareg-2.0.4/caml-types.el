@@ -71,7 +71,7 @@ type call ident"
 (set-face-doc-string 'caml-types-expr-face
                      "face for hilighting expressions and types")
 (if (not (face-differs-from-default-p 'caml-types-expr-face))
-    (set-face-background 'caml-types-expr-face "#88FF44"))
+    (set-face-background 'caml-types-expr-face "#1A1A1A"))
 (overlay-put caml-types-expr-ovl 'face 'caml-types-expr-face)
 
 (defvar caml-types-typed-ovl (make-overlay 1 1))
