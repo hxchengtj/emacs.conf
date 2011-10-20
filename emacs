@@ -5,7 +5,7 @@
 (setq tab-width 2)
 (if (<= (x-display-pixel-height) 800)
     (add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
-  (add-to-list 'default-frame-alist '(font . "Lucida Console-14")))
+  (add-to-list 'default-frame-alist '(font . "Terminus-15")))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (global-linum-mode t)
 (column-number-mode t)
