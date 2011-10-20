@@ -22,7 +22,9 @@
 (if window-system
     (progn
       (load "~/.emacs.d/color-theme-almost-monokai.el")
-      (color-theme-almost-monokai))
+      (color-theme-almost-monokai)
+      (setq ansi-color-names-vector ["#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"])
+      (setq ansi-term-color-vector [unspecified "#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"]))
   (progn
     (load "~/.emacs.d/zenburn.el")
     (color-theme-zenburn)))
