@@ -256,7 +256,9 @@ table determines which characters these are."
 ;;
 
 ;; eldoc
-(setq c-eldoc-includes "`gsl-config --cflags` -I/export/users/ubuntu/local/include -I/export/users/ubuntu/local/src/MCMCBenchmarks/include")
+(setq HOME (expand-file-name ""))
+(setq GSL-FLAGS (substring (shell-command-to-string "gsl-config --cflags") 0 -1))
+(setq c-eldoc-includes (format "%s -I%s/local/include -I%s/local/src/MCMCBenchmarks/include" GSL-FLAGS HOME HOME))
 (load "c-eldoc")
 
 ;; flymake
