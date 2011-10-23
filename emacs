@@ -270,6 +270,7 @@ table determines which characters these are."
 	 (list
 	  "-o" "nul"
 	  "-S" source
+	  "--std=c99"
 	  (concat "-I" base-dir))
 	 (split-string c-eldoc-includes " "))))
 (defun flymake-custom-c-init ()
