@@ -263,7 +263,9 @@ table determines which characters these are."
 (load "c-eldoc")
 
 ;; flymake
+(require 'flymake)
 (setq flymake-gui-warnings-enabled nil)
+
 (defun flymake-get-gcc-cmdline (source base-dir)
   (list "gcc"
 	(append
@@ -287,8 +289,31 @@ table determines which characters these are."
 		 t t
 		 'flymake-get-gcc-cmdline))))
     args))
-(require 'flymake)
 (add-to-list 'flymake-allowed-file-name-masks '(".+\\.c$" flymake-custom-c-init))
+
+(defun flymake-get-g++-cmdline (source base-dir)
+  (list "g++"
+	(append
+	 (list
+	  "-o" "nul"
+	  "-S" source
+	  (concat "-I" base-dir))
+	 (split-string c-eldoc-includes " "))))
+(defun flymake-custom-cc-init ()
+  (let* ((args nil)
+	 (source-file-name   buffer-file-name)
+	 (buildfile-dir      (file-name-directory source-file-name)))
+    (if buildfile-dir
+	(let*
+	    ((temp-source-file-name
+	      (flymake-init-create-temp-buffer-copy 'flymake-create-temp-inplace)))
+	  (setq args
+		(flymake-get-syntax-check-program-args
+		 temp-source-file-name buildfile-dir
+		 t t
+		 'flymake-get-g++-cmdline))))
+    args))
+(add-to-list 'flymake-allowed-file-name-masks '(".+\\.cc$" flymake-custom-cc-init))
 
 (defun my-flymake-show-help ()
   (when (get-char-property (point) 'flymake-overlay)
