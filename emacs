@@ -8,7 +8,7 @@
 	(add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
       (add-to-list 'default-frame-alist '(font . "Terminus-15"))))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-(global-linum-mode t)
+(global-linum-mode nil)
 (column-number-mode t)
 (setq-default fill-column 80)
 (global-visual-line-mode 1)
@@ -31,6 +31,8 @@
 
 (show-paren-mode 1)
 (setq show-paren-delay 0)
+(global-set-key (kbd "C-c TAB") 'completion-at-point)
+(add-hook 'emacs-lisp-mode-hook 'linum-on)
 
 ;; disable backup
 (setq make-backup-files nil)
@@ -73,6 +75,7 @@
 (add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
+(add-hook 'ess-mode-hook 'linum-on)
 (custom-set-faces
  `(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
 
@@ -323,8 +326,11 @@ table determines which characters these are."
 (add-hook 'post-command-hook 'my-flymake-show-help)
 
 (defun my-c++-mode-hook ()
+  (linum-mode t)
+  (flymake-mode 1)
   (auto-fill-mode))
 (defun my-c-mode-hook ()
+  (linum-mode t)
   (flymake-mode 1)
   (auto-fill-mode)
   (c-turn-on-eldoc-mode))
