@@ -257,12 +257,14 @@ table determines which characters these are."
 ;;
 ;; C++ and C mode...
 ;;
-
-;; eldoc
 (setq HOME (expand-file-name ""))
+(setq LOCAL-FLAGS (format "-I%s/local/include -I%s/local/src/MCMCBenchmarks/include" HOME HOME))
 (setq GSL-FLAGS (substring (shell-command-to-string "gsl-config --cflags") 0 -1))
 (setq R-FLAGS (substring (shell-command-to-string "R CMD config --cppflags") 0 -1))
-(setq c-eldoc-includes (format "%s %s -I%s/local/include -I%s/local/src/MCMCBenchmarks/include" GSL-FLAGS R-FLAGS HOME HOME))
+(setq CFLAGS (concat LOCAL-FLAGS " " GSL-FLAGS " " R-FLAGS))
+
+;; eldoc
+(setq c-eldoc-includes CFLAGS)
 (load "c-eldoc")
 
 ;; flymake
@@ -277,7 +279,7 @@ table determines which characters these are."
 	  "-S" source
 	  "--std=c99"
 	  (concat "-I" base-dir))
-	 (split-string c-eldoc-includes " "))))
+	 (split-string CFLAGS " "))))
 (defun flymake-custom-c-init ()
   (let* ((args nil)
 	 (source-file-name   buffer-file-name)
@@ -301,7 +303,7 @@ table determines which characters these are."
 	  "-o" "nul"
 	  "-S" source
 	  (concat "-I" base-dir))
-	 (split-string c-eldoc-includes " "))))
+	 (split-string CFLAGS " "))))
 (defun flymake-custom-cc-init ()
   (let* ((args nil)
 	 (source-file-name   buffer-file-name)
