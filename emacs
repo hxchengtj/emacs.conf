@@ -8,7 +8,6 @@
 	(add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
       (add-to-list 'default-frame-alist '(font . "Terminus-15"))))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
-(global-linum-mode nil)
 (column-number-mode t)
 (setq-default fill-column 80)
 (global-visual-line-mode 1)
@@ -32,7 +31,9 @@
 (show-paren-mode 1)
 (setq show-paren-delay 0)
 (global-set-key (kbd "C-c TAB") 'completion-at-point)
-(add-hook 'emacs-lisp-mode-hook 'linum-on)
+(defun linum-mode-on ()
+  (linum-mode t))
+(add-hook 'emacs-lisp-mode-hook 'linum-mode-on)
 
 ;; disable backup
 (setq make-backup-files nil)
@@ -124,7 +125,6 @@
 (setq org-use-fast-todo-selection t)
 (setq org-use-tag-inheritance nil)
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
-(add-hook 'org-mode-hook 'linum-mode)
 (setq org-link-abbrev-alist
       '(("PMID" . "http://www.ncbi.nlm.nih.gov/pubmed/")
 	("DOI" . "http://dx.doi.org/")))
