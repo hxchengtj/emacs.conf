@@ -314,6 +314,7 @@ table determines which characters these are."
 		 'flymake-get-g++-cmdline))))
     args))
 (add-to-list 'flymake-allowed-file-name-masks '(".+\\.cc$" flymake-custom-cc-init))
+(add-to-list 'flymake-allowed-file-name-masks '(".+\\.cpp$" flymake-custom-cc-init))
 
 (defun my-flymake-show-help ()
   (when (get-char-property (point) 'flymake-overlay)
