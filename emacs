@@ -41,6 +41,12 @@
 ;; disable auto save
 (setq auto-save-default nil)
 
+;;
+;; dired
+;;
+(setq dired-omit-files "^\\...+$")
+(add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1)))
+
 ;; ssh
 (require 'ssh)
 
