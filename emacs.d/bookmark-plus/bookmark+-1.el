@@ -3585,7 +3585,7 @@ BOOKMARK is a bookmark name or a bookmark record."
 (defun bmkp-dired-this-dir-bookmark-p (bookmark)
   "Return non-nil if BOOKMARK is a Dired bookmark for the `default-directory'.
 BOOKMARK is a bookmark name or a bookmark record."
-  (and (bmkp-dired-bookmark-p bookmark)  (let ((dir  (bookmark-get-filename bookmark)))
+  (and (bmkp-dired-bookmark-p bookmark)  (let ((dir  (file-name-directory (bookmark-get-filename bookmark))))
                                            (bmkp-same-file-p dir default-directory))))
 
 (defun bmkp-file-bookmark-p (bookmark)
