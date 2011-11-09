@@ -62,6 +62,12 @@
 (global-set-key (kbd "<f11>") ; make F11 switch to gtd.org
 		(lambda()(interactive)(find-file "~/GTD/gtd.org")))
 
+;;
+;; Bookmarks
+;;
+(add-to-list 'load-path "~/.emacs.d/bookmark-plus")
+(require 'bookmark+)
+
 ;; FlySpell mode
 (ispell-change-dictionary "en_GB")
 (setq ispell-program-name "aspell")
