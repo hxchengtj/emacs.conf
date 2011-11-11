@@ -14,6 +14,16 @@
 (setq split-height-threshold nil)
 ;(setq split-width-threshold nil)
 (setq inhibit-startup-screen t)
+(delete-selection-mode 0)
+(setq x-select-enable-clipboard t)
+(setq vc-handled-backends nil)
+(fset 'yes-or-no-p 'y-or-n-p)
+(setq confirm-nonexistent-file-or-buffer nil)
+
+;; don't ask if I really want to kill a buffer with attached running process
+(setq kill-buffer-query-functions
+      (remq 'process-kill-buffer-query-function
+	    kill-buffer-query-functions))
 
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
@@ -108,11 +118,9 @@
 (require 'ido)
 (ido-mode t)
 (setq ido-enable-flex-matching t)
-(delete-selection-mode 0)
-(setq x-select-enable-clipboard t)
-(setq vc-handled-backends nil)
+(setq ido-create-new-buffer 'always)
 
-;; (server-start)
+(server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function)
 
 (global-set-key (kbd "<f12>") ; make F12 switch to .emacs; create if needed
