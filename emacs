@@ -6,7 +6,7 @@
 (if window-system
     (if (<= (x-display-pixel-height) 800)
 	(add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
-      (add-to-list 'default-frame-alist '(font . "Terminus-15"))))
+      (add-to-list 'default-frame-alist '(font . "Inconsolata-14"))))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (column-number-mode t)
 (setq-default fill-column 80)
