@@ -311,6 +311,12 @@ table determines which characters these are."
 (global-set-key (kbd "<f9>") (lambda () (interactive) (big-margin-toggle)))
 
 ;;
+;; git
+;;
+(add-to-list 'load-path "~/.emacs.d/egg")
+(require 'egg)
+
+;;
 ;; OCaml
 ;;
 (add-to-list 'load-path "~/.emacs.d/tuareg-2.0.4")
