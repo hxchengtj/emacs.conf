@@ -25,6 +25,8 @@
       (remq 'process-kill-buffer-query-function
 	    kill-buffer-query-functions))
 
+(setq set-mark-command-repeat-pop t)
+
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
