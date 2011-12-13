@@ -154,7 +154,7 @@
 (add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
-(add-hook 'ess-mode-hook 'linum-on)
+;; (add-hook 'ess-mode-hook 'linum-on)
 (custom-set-faces
  `(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
 
