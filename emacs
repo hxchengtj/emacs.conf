@@ -333,14 +333,6 @@ table determines which characters these are."
 (require 'egg)
 
 ;;
-;; OCaml
-;;
-(add-to-list 'load-path "~/.emacs.d/tuareg-2.0.4")
-(add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . tuareg-mode))
-(autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
-(autoload 'camldebug "camldebug" "Run the Caml debugger" t)
-
-;;
 ;; C++ and C mode...
 ;;
 (setq HOME (expand-file-name ""))
@@ -450,3 +442,43 @@ table determines which characters these are."
          :filename-regex ,(concat (regexify-ext-list '(java html xml txt conf yml css R js)) "\\|.*conf/.*")
 	 :exclude-paths ("tmp")
          :on-hit (lambda (p) (message (car p))))))
+
+;;
+;; OCaml
+;;
+;; (add-to-list 'load-path "~/.emacs.d/tuareg-2.0.4")
+;; (add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . tuareg-mode))
+;; (autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
+;; (autoload 'camldebug "camldebug" "Run the Caml debugger" t)
+
+;; Loading TypeRex mode for OCaml files
+(add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . typerex-mode))
+(autoload 'typerex-mode "typerex" "Major mode for editing Caml code" t)
+
+;; TypeRex mode configuration
+(setq ocp-server-command "~/local/bin/ocp-wizard")
+(setq typerex-in-indent 0)
+(setq-default indent-tabs-mode nil)
+
+;; Uncomment to enable typerex command menu by right click
+;;(setq ocp-menu-trigger [mouse-3])
+
+;; Uncomment make new syntax coloring look almost like Tuareg
+;;(setq ocp-theme "tuareg_like")
+;; Uncomment to disable new syntax coloring and use Tuareg
+;;(setq ocp-syntax-coloring nil)
+
+;;;; Auto completion (experimental)
+;;;; Don't use M-x invert-face default with auto-complete! (emacs -r is OK)
+(add-to-list 'load-path "~/.emacs.d/auto-complete-mode")
+(setq ocp-auto-complete t)
+
+;;;; Using <`> to complete whatever the context, and <C-`> for `
+(setq auto-complete-keys 'ac-keys-backquote-backslash)
+;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
+;;;; Note: this overrides individual auto-complete key settings
+
+;;;; I want immediate menu pop-up
+(setq ac-auto-show-menu 0.)
+;;;; Short delay before showing help
+(setq ac-quick-help-delay 0.3)
