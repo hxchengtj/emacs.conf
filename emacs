@@ -250,7 +250,7 @@
 (add-to-list 'load-path "~/.emacs.d/notmuch")
 (setq notmuch-search-authors-width 40)
 (setq notmuch-search-oldest-first nil)
-;(setq notmuch-command "/export/users/ubuntu/local/bin/notmuch")
+;; (setq notmuch-command "/home/antonio/local/bin/notmuch")
 (require 'notmuch)
 (require 'org-notmuch)
 
