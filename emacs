@@ -478,6 +478,9 @@ table determines which characters these are."
 ;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
 ;;;; Note: this overrides individual auto-complete key settings
 
+;;;; Number of characters required to start (nil to disable)
+(setq ac-auto-start 0)
+
 ;;;; I want immediate menu pop-up
 (setq ac-auto-show-menu 0.)
 ;;;; Short delay before showing help
