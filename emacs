@@ -153,12 +153,13 @@
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 
 ;; ESS
+(setq user-full-name "Antonio, Fabio Di Narzo")
 (add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
 ;; (add-hook 'ess-mode-hook 'linum-on)
 (custom-set-faces
- `(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
+ '(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
 
 ;; AUCTEX
 (add-to-list 'load-path "/usr/share/emacs23/site-lisp")
