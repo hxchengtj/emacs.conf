@@ -475,7 +475,7 @@ table determines which characters these are."
 (setq ocp-auto-complete t)
 
 ;;;; Using <`> to complete whatever the context, and <C-`> for `
-(setq auto-complete-keys 'ac-keys-backquote-backslash)
+;; (setq auto-complete-keys 'ac-keys-backquote-backslash)
 ;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
 ;;;; Note: this overrides individual auto-complete key settings
 
