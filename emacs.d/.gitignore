@@ -2,3 +2,5 @@ tramp
 .project-roots
 auto-save-list
 *.elc
+typerex-1.0.1
+ac-comphist.dat
