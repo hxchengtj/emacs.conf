@@ -461,6 +461,39 @@ table determines which characters these are."
 (setq typerex-in-indent 0)
 (setq-default indent-tabs-mode nil)
 
+;;
+;; a general purpose Makefile can be as follows:
+;;
+;; OCAMLC = ocp-ocamlc.opt
+;; OCAMLOPT = ocamlopt.opt
+;; OCAMLDEP = ocamldep
+;; OCAMLLEX = ocamllex
+;; OCAMLYACC = ocamlyacc
+
+;; lexers := $(wildcard *.mll)
+;; parsers := $(wildcard *.mly)
+;; sources := $(wildcard *.ml) $(lexers:.mll=.ml) $(parsers:.mly=.ml)
+;; targets.byte := $(sources:.ml=.byte)
+;; targets.native := $(sources:.ml=.native)
+;; targets.annot := $(sources:.ml=.annot)
+
+;; all: $(targets.byte) $(targets.native) $(targets.annot)
+
+;; %.ml: %.mll
+;; 	ocamlbuild -no-hygiene $@
+
+;; %.ml: %.mly
+;; 	ocamlbuild -no-hygiene $@
+
+;; %.annot: %.ml
+;; 	$(OCAMLC) -c -annot $< -o /dev/null && rm $(<:.ml=.cmi) $(<:.ml=.cmo)
+
+;; %.byte: %.ml
+;; 	ocamlbuild -no-hygiene -tag debug $@
+
+;; %.native: %.ml
+;; 	ocamlbuild -no-hygiene $@
+
 ;; Uncomment to enable typerex command menu by right click
 ;;(setq ocp-menu-trigger [mouse-3])
 
