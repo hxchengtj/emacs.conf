@@ -129,7 +129,6 @@
 (setq ido-enable-flex-matching t)
 (setq ido-create-new-buffer 'always)
 
-(server-start)
 (remove-hook 'kill-buffer-query-functions 'server-kill-buffer-query-function)
 
 (global-set-key (kbd "<f12>") ; make F12 switch to .emacs; create if needed
