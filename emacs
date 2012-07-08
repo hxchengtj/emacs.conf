@@ -154,12 +154,13 @@
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 
 ;; ESS
+(setq user-full-name "Antonio, Fabio Di Narzo")
 (add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
 ;; (add-hook 'ess-mode-hook 'linum-on)
 (custom-set-faces
- `(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
+ '(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
 
 ;; AUCTEX
 (add-to-list 'load-path "/usr/share/emacs23/site-lisp")
@@ -454,12 +455,47 @@ table determines which characters these are."
 
 ;; Loading TypeRex mode for OCaml files
 (add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . typerex-mode))
+(add-to-list 'interpreter-mode-alist '("ocamlrun" . typerex-mode))
+(add-to-list 'interpreter-mode-alist '("ocaml" . typerex-mode))
 (autoload 'typerex-mode "typerex" "Major mode for editing Caml code" t)
 
 ;; TypeRex mode configuration
 (setq ocp-server-command "~/local/bin/ocp-wizard")
 (setq typerex-in-indent 0)
 (setq-default indent-tabs-mode nil)
+
+;;
+;; a general purpose Makefile can be as follows:
+;;
+;; OCAMLC = ocp-ocamlc.opt
+;; OCAMLOPT = ocamlopt.opt
+;; OCAMLDEP = ocamldep
+;; OCAMLLEX = ocamllex
+;; OCAMLYACC = ocamlyacc
+
+;; lexers := $(wildcard *.mll)
+;; parsers := $(wildcard *.mly)
+;; sources := $(wildcard *.ml) $(lexers:.mll=.ml) $(parsers:.mly=.ml)
+;; targets.byte := $(sources:.ml=.byte)
+;; targets.native := $(sources:.ml=.native)
+;; targets.annot := $(sources:.ml=.annot)
+
+;; all: $(targets.byte) $(targets.native) $(targets.annot)
+
+;; %.ml: %.mll
+;; 	ocamlbuild -no-hygiene $@
+
+;; %.ml: %.mly
+;; 	ocamlbuild -no-hygiene $@
+
+;; %.annot: %.ml
+;; 	$(OCAMLC) -c -annot $< -o /dev/null && rm $(<:.ml=.cmi) $(<:.ml=.cmo)
+
+;; %.byte: %.ml
+;; 	ocamlbuild -no-hygiene -tag debug $@
+
+;; %.native: %.ml
+;; 	ocamlbuild -no-hygiene $@
 
 ;; Uncomment to enable typerex command menu by right click
 ;;(setq ocp-menu-trigger [mouse-3])
@@ -475,7 +511,7 @@ table determines which characters these are."
 (setq ocp-auto-complete t)
 
 ;;;; Using <`> to complete whatever the context, and <C-`> for `
-(setq auto-complete-keys 'ac-keys-backquote-backslash)
+;; (setq auto-complete-keys 'ac-keys-backquote-backslash)
 ;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
 ;;;; Note: this overrides individual auto-complete key settings
 

@@ -18,38 +18,41 @@
 ;; This file defines a set of faces for use with new TypeRex syntax
 ;; coloring, both on dark or light background.
 
-(defgroup ocp-faces nil
-  "New OCP faces for the TypeRex mode."
-  :group 'ocp)
+(defgroup typerex-new-faces nil
+  "Special faces for the new TypeRex syntax coloring."
+  :group 'typerex-syntax-coloring)
 
-(defun face (name desc)
+(defun ocp-face-name (name)
+  (intern (concat "ocp-face-" (symbol-name name))))
+
+(defun ocp-face-same (name desc)
   (progn
-  (eval `(defface ,name `(
+  (eval `(defface ,(ocp-face-name name) `(
    (t
     ,desc
     )) ,(format "Face for %s tokens" name)
-       :group 'ocp-faces))
+       :group 'typerex-new-faces))
 ;  (eval `(defvar ,name `,name))
   ))
 
-(defun face-light-dark (name light dark)
-  (eval `(defface ,name `(
+(defun ocp-face-light-dark (name light dark)
+  (eval `(defface ,(ocp-face-name name) `(
    (((background light))
     ,light
    )(t
     ,dark
     )) ,(format "Face for %s tokens" name)
-       :group 'ocp-faces)))
+       :group 'typerex-new-faces)))
 
-(defun face1 (f)
+(defun ocp-face (f)
   (if (eq (length f) 3)
-      (face-light-dark (car f) (cadr f) (cadr (cdr f)))
-    (face (car f) (cadr f))))
+      (ocp-face-light-dark (car f) (cadr f) (cadr (cdr f)))
+    (ocp-face-same (car f) (cadr f))))
 
 
 ;; The following defines a list of faces by means of entries of the
 ;; following format: (<name> <light background> [<dark background>])
-(mapc 'face1 '(
+(defconst ocp-faces `(
 
 ;; Keywords
   (governing
@@ -71,6 +74,9 @@
    (:weight ultra-bold :foreground "MediumOrchid3" :background "purple4"))
   (func
    (:weight ultra-bold :foreground "purple3"))
+  (op-field
+   (:weight ultra-bold)
+   (:foreground "gray85" :weight ultra-bold))
 
 ;; Operators
   (op
@@ -92,20 +98,20 @@
   (type-occ
    (:foreground "OliveDrab4"))
   (type-def
-   (:weight bold :inherit type-occ))
+   (:weight bold :inherit ,(ocp-face-name 'type-occ)))
   (type-variable
    (:weight bold :foreground "dark violet"))
   (cstr-occ
    (:inherit font-lock-constant-face)
    (:foreground "medium sea green"))
   (cstr-def
-   (:weight bold :inherit cstr-occ)
+   (:weight bold :inherit ,(ocp-face-name 'cstr-occ))
    (:weight bold :foreground "medium sea green"))
   (field-occ
    (:inherit font-lock-constant-face)
    (:foreground "medium sea green"))
   (field-def
-   (:weight bold :inherit field-occ)
+   (:weight bold :inherit ,(ocp-face-name 'field-occ))
    (:weight bold :foreground "medium sea green"))
   (variant
    (:inherit font-lock-constant-face))
@@ -116,18 +122,18 @@
    (:inherit font-lock-variable-name-face)
    (:foreground "peru"))
   (val-def-fun
-   (:weight bold :inherit val-occ-fun)
+   (:weight bold :inherit ,(ocp-face-name 'val-occ-fun))
    (:weight bold :foreground "light sky blue"))
   (val-def
-   (:weight bold :inherit val-occ))
+   (:weight bold :inherit ,(ocp-face-name 'val-occ)))
   (method-occ
-   (:inherit val-occ))
+   (:inherit ,(ocp-face-name 'val-occ)))
   (method-def
-   (:weight bold :inherit method-occ))
+   (:weight bold :inherit ,(ocp-face-name 'method-occ)))
   (mod-occ
    (:foreground "dark orange"))
   (mod-def
-   (:weight bold :inherit mod-occ))
+   (:weight bold :inherit ,(ocp-face-name 'mod-occ)))
   (builtin
    (:inherit font-lock-builtin-face))
 
@@ -139,9 +145,9 @@
   (doc-title
    (:weight bold :foreground "black" :background "light blue"))
   (doc-italic
-   (:slant italic :inherit doc))
+   (:slant italic :inherit ,(ocp-face-name 'doc)))
   (doc-bold
-   (:weight bold :inherit doc))
+   (:weight bold :inherit ,(ocp-face-name 'doc)))
   (doc-keyword
    (:foreground "magenta4"))
   (doc-stop
@@ -159,6 +165,8 @@
    (:background "purple4"))
 
 ))
+
+(mapc 'ocp-face ocp-faces)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                                        ;
 ;                        TypeRex OCaml Studio                            ;
@@ -204,6 +212,17 @@
 (defun check-byte (pos)
   (min (position-bytes (point-max)) (max (position-bytes (point-min)) pos)))
 
+(defun line-column-bytes ()
+  (let ((l (line-number-at-pos))
+        (c (- (position-bytes (point))
+              (position-bytes (line-beginning-position)))))
+    (format "%d %d" l c)))
+
+(defun line-column-to-pos (l c)
+  (save-excursion
+    (goto-char (point-min))
+    (byte-to-position (+ (position-bytes (line-beginning-position l)) c))))
+
 (defun highlight-overlay (face start end)
   "put an overlay on the given range, in the current buffer"
   (let ((overlay (make-overlay (check-position start) (check-position end))))
@@ -227,8 +246,7 @@
 
 (defun highlight-regions (forever regions)
   (let ((overlays (mapcar 'highlight-region regions)))
-    (if (eq forever t)
-        ()
+    (unless (eq forever t)
       (do-at-next-input
        (lambda (ovs) (mapc 'delete-overlay ovs)) overlays))
     nil))
@@ -279,7 +297,6 @@ buffer to display the question if it is too long."
 
 (defun propertize-regions (regions)
   (mapc 'set-text-properties-region regions)
-;  (message "propertize-regions done")
   nil)
 
 (defun propertize-region-list (regions)
@@ -303,22 +320,11 @@ buffer to display the question if it is too long."
 
 (defun propertize-region-lists-char (regions)
   (mapc 'propertize-region-list regions)
-;  (message "propertize-region-lists done")
   nil)
 
 (defun propertize-region-lists-byte (regions)
   (mapc 'propertize-region-list-byte regions)
-;  (message "propertize-region-lists done")
   nil)
-
-;(highlight 'typerex-font-lock-governing-face 2500 2600)
-;(highlight typerex-font-lock-governing-face 2500 2600)
-;(highlight overlay-def 2500 2600)
-;(add-text-properties 2159 2170 `(comment t face highlight))
-;(highlight-regions nil `((,overlay-def 1600 1610) (,overlay-ref 1700 1710)))
-;(propertize-regions `((1 3 (face ,overlay-def)) (5 9 (face ,overlay-ref))))
-;(propertize-region-list `( (face ,overlay-def) ((1 3)) ))
-;(propertize-region-lists `(((face ,overlay-def) ((1 3)))))
 
 (defun get-buffer-create-clear (name)
   "return a buffer with the given name, clearing it if necessary"
@@ -390,25 +396,15 @@ buffer to display the question if it is too long."
 (defun revert-with-history ()
   "revert the current buffer while keeping its history"
   (let ((pos (point)))
-;    (setq buffer-bytes 0)
     (save-excursion
-;	  (setq scroll (window-vscroll))
-;	  (setq auto-window-vscroll nil)
+;;	  (setq scroll (window-vscroll))
+;;	  (setq auto-window-vscroll nil)
       (clear-visited-file-modtime)
       (widen)
-; tell ocp-wizard to re-fontify the whole buffer
-;;      (combine-after-change-calls
-;;        (atomic-change-group
       (setq inhibit-modification-hooks t)
        (delete-region (point-min) (point-max))
-;	  (erase-buffer)
        (setq inhibit-modification-hooks nil)
        (insert-file-contents (buffer-file-name))
-;      (message "fontifying")
-;      (typerex-fontify-changed-region 0 0))
-;      (message "fontified")
-;	(set-window-vscroll nil scroll)
-       ; Problem: if we undo and then redo, emacs forgets the goto.
       )
     (goto-char pos)
     (set-buffer-modified-p nil)
@@ -420,8 +416,8 @@ buffer to display the question if it is too long."
   (let ((buffer (find-buffer-visiting filename)))
     (unless (eq buffer nil)
       (with-current-buffer buffer
-; workaround for the duplicate insertion bug
-;        (revert-buffer t t t))
+;; workaround for the duplicate insertion bug
+;;        (revert-buffer t t t))
         (revert-with-history)
         (setq buffer-undo-list nil)
         (push '(apply ocp-undo) buffer-undo-list)
@@ -440,8 +436,8 @@ buffer to display the question if it is too long."
     (unless (eq buffer nil)
       (with-current-buffer buffer
         (set-visited-file-name new-filename t t)
-; workaround for the duplicate insertion bug
-;        (revert-buffer t t t))
+;; workaround for the duplicate insertion bug
+;;       (revert-buffer t t t))
         (revert-with-history)
         (setq buffer-undo-list nil)
         (push '(apply ocp-undo) buffer-undo-list)
@@ -464,202 +460,128 @@ buffer to display the question if it is too long."
 ;                                                                        ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Emacs lisp implementation of our RPC protocol.
+;; Emacs lisp implementation of our RPC protocol.
 
-; Usage:
+;; Usage:
 
-; - Connect to the listening server using by evaluating
-;     (start-connection port-number)
-;   or setup a server with
-;     (start-rpc-server)
-;   The protocol is the one implemented by class
-;     Server.tagged_connection
+;; - Connect to the listening server using by evaluating
+;;     (start-connection port-number)
+;;   or setup a server with
+;;     (start-rpc-server)
+;;   The protocol is the one implemented by class
+;;     Server.tagged_connection
 
-; - Then use
-;     (string-command command)
-;   which behaves as method send_tagged_command, to execute requests.
+;; - Then use
+;;     (ocp-rpc-string-command command)
+;;   which behaves as method send_tagged_command, to execute requests.
 
-; - Callbacks are processed by calling the function process-callback
-;   on the buffer which contains the contents. Contents should be read
-;   from the point. The process-callback function is responsible for
-;   error encoding.
+;; - Callbacks are processed by calling the function
+;;   ocp-rpc-process-callback on the string representing the
+;;   callback. The ocp-rpc-process-callback function is responsible
+;;   for error encoding.
 
-; - Accepting requests is not implemented, since we don't use it in
-;   TypeRex because Emacs initiates the requests.
+;; - Accepting requests is not implemented, since we don't use it in
+;;   TypeRex because Emacs initiates the requests.
 
-(defconst end-of-message "END_OF_MESSAGE"
+(require 'tq)
+
+(defconst ocp-rpc-end-of-message "END_OF_MESSAGE"
   "mark for the client to detect the end of the answer")
 
-(defconst request-start "REQUEST_START"
+(defconst ocp-rpc-request-start "REQUEST_START"
   "mark for the client to detect the beginning of a request")
 
-(defvar connection-buffer nil
-  "all input received from ocp-wizard goes here")
+(defconst ocp-rpc-request-start-length (+ 1 (length ocp-rpc-request-start)))
 
-(defvar current-callback-start nil
-  "start of a callback, if any")
-
-(defvar current-answer-start nil
-  "start of an answer, if any")
-
-(defvar next-message-start 1
-  "start of an answer, if any")
-
-(defvar last-answer nil
-  "region containing the last answer")
-
-(defvar connection nil
+(defvar ocp-rpc-connection nil
   "connection process, (used, e.g. for sending data)")
 
-(defvar connection-server nil
+(defvar ocp-rpc-queue nil
+  "transaction queue on ocp-rpc-connection")
+
+(defvar ocp-rpc-connection-server nil
   "server process")
 
-(defun connection-filter (proc string)
-;  (message "inserting %d chars" (length string))
-  (with-current-buffer connection-buffer
-; always go to the end BEFORE (in case the user moves the pointer)
-    (goto-char (point-max))
-    (insert string)
-; try to determine the nature of the next message
-    (if (not (eq next-message-start nil))
-        (progn
-;        (message "message starts at %s" next-message-start)
-          (goto-char next-message-start)
-          (if (< (line-number-at-pos next-message-start)
-                 (line-number-at-pos (point-max)))
-              (progn
-                (end-of-line)
-                (let ((next-line (buffer-substring next-message-start (point))))
-;                (message "next line complete")
-                  (if (string= next-line request-start)
-                      (setq current-callback-start (+ (point) 1))
-                    (setq current-answer-start next-message-start))
-                  (setq next-message-start nil))))
-          (goto-char (point-max)))))
-; if we are receiving a callback
-  (if (not (eq current-callback-start nil))
-      (let ((complete
-             (with-current-buffer connection-buffer
-               (forward-line -1)
-               (let ((bol (point)))
-                 (end-of-line)
-                 (let ((last-line (buffer-substring bol (point))))
-                   (if (string= last-line end-of-message)
-                       (progn
-                         (goto-char current-callback-start)
-                         (setq current-callback-start nil)
-                         (setq next-message-start (point-max))
-;                    (message "received message %s" (buffer-substring (point) (point-max)))
-                         t)
-                     nil))))))
-        (if complete
-            (let ((result (process-callback connection-buffer)))
-              (process-send-string connection
-                                   (concat result "\n" end-of-message "\n"))
-              )))
-; if we are receiving an answer
-    (if (not (eq current-answer-start nil))
-        (with-current-buffer connection-buffer
-;            (message "reading answer from %d" current-answer-start)
-          (forward-line -1)
-          (let ((bol (point)))
-            (end-of-line)
-            (let ((last-line (buffer-substring bol (point))))
-              (if (string= last-line end-of-message)
-                  (progn
-;                      (message "answer ends at %d" (- bol 1))
-                    (setq last-answer `(,current-answer-start ,(- bol 1)))
-                    (setq current-answer-start nil)
-                    (setq next-message-start (point-max))))))))))
-
-(defun get-answer ()
-  "get an expected answer"
-  (let ((quit-inhibited inhibit-quit))
-    (setq inhibit-quit t)
-    (while (and (eq last-answer nil) (eq (process-status connection) 'open))
-      (accept-process-output connection 1 0))
-    (unless (eq (process-status connection) 'open)
-      (signal 'error '("Error: connection closed")))
-    (let ((answer last-answer))
-      (setq last-answer nil)
-;    (message "last answer = [%d, %d[" (car answer) (cadr answer))
+(defun ocp-rpc-make-transaction (c)
+  "send a message and get the expected reply. Both messages can
+be either requests or answers"
+;;  (message "sending message %s" c)
+  (let ((reply (make-vector 1 nil)))
+    (tq-enqueue
+     ocp-rpc-queue
+     (concat c "\n" ocp-rpc-end-of-message "\n")
+     (concat "\n" ocp-rpc-end-of-message "\n")
+     reply
+     (lambda (reply answer)
+       (setq answer (substring answer 0 (- (+ 2 (length ocp-rpc-end-of-message)))))
+;;       (message "received message %s" answer)
+       (aset reply 0 answer))
+     t)
+    (let ((quit-inhibited inhibit-quit))
+      (setq inhibit-quit t)
+      (while
+          (and (eq (aref reply 0) nil)
+               (eq (process-status ocp-rpc-connection) 'open))
+        (accept-process-output ocp-rpc-connection 1 0))
+      (unless (eq (process-status ocp-rpc-connection) 'open)
+        (signal 'error '("Error: connection closed")))
       (setq inhibit-quit quit-inhibited)
-      answer))
+      (aref reply 0)))
   )
 
-(defun delete-until (p)
-  (let ((shift (- p (point-min))))
-    (with-current-buffer connection-buffer
-      (delete-region (point-min) p))
-    (unless (eq next-message-start nil)
-      (setq next-message-start (- next-message-start shift)))
-    (unless (eq current-answer-start nil)
-      (setq current-answer-start (- current-answer-start shift)))
-    (unless (eq current-callback-start nil)
-      (setq current-callback-start (- current-callback-start shift)))))
+(defun ocp-rpc-get-answer (c)
+  "send a message and get a result"
+  (let ((answer (ocp-rpc-make-transaction c)))
+    (if (and (>= (length answer) ocp-rpc-request-start-length)
+         (string=
+         (substring answer 0 ocp-rpc-request-start-length)
+         (concat ocp-rpc-request-start "\n")))
+        (let ((callback (substring answer (length ocp-rpc-request-start))))
+;;          (message "received callback %s" callback)
+          (let ((result (ocp-rpc-process-callback callback)))
+;;            (message "sending result %s" result)
+            (ocp-rpc-get-answer result)))
+      answer)))
 
-(defun string-command (c)
-;  (message "sending command %s" c)
-  (process-send-string connection
-                       (concat request-start "\n" c "\n" end-of-message "\n"))
-;  (message "command sent:   %s" c)
-  (let*
-      ((answer-region (get-answer))
-       (answer
-        (with-current-buffer connection-buffer
-          (buffer-substring (car answer-region) (cadr answer-region)))))
-;    (message "received answer %s" answer)
-    (delete-until (cadr answer-region))
-    answer))
+(defun ocp-rpc-string-command (c)
+  "send a command and get the expected result"
+  (ocp-rpc-get-answer (concat ocp-rpc-request-start "\n" c)))
 
-(defun start-connection (port)
+(defun ocp-rpc-start-connection (port)
   "start connection by listening on specified port"
   (setq max-lisp-eval-depth 10000)
-  (setq connection-buffer (get-buffer-create-clear " *output-from-ocp-wizard*"))
-  (setq next-message-start 1)
-  (setq current-answer-start nil)
-  (setq current-callback-start nil)
-  (setq last-answer nil)
-  (setq connection
+  (setq ocp-rpc-connection
         (open-network-stream "ocp-wizard-client" nil 'local port))
-  (set-process-filter connection 'connection-filter)
-  (set-process-query-on-exit-flag connection nil)
+  (set-process-filter ocp-rpc-connection 'ocp-rpc-connection-filter)
+  (set-process-query-on-exit-flag ocp-rpc-connection nil)
   )
 
-(defun connection-sentinel (process event)
+(defun ocp-rpc-connection-sentinel (process event)
   (if (string= (substring event 0 4) "open")
       (progn
-;        (message "connected")
-        (setq connection process)
-        (set-process-query-on-exit-flag connection nil))
+;;        (message "connected")
+        (setq ocp-rpc-connection process)
+        (setq ocp-rpc-queue (tq-create ocp-rpc-connection))
+        (set-process-query-on-exit-flag ocp-rpc-connection nil))
     ))
 
-(defun start-rpc-server ()
+(defun ocp-rpc-start-server ()
   "start a server connection and return the listening port"
   (setq max-lisp-eval-depth 10000)
-  (setq connection-buffer (get-buffer-create-clear " *output-from-ocp-wizard*"))
-  (setq next-message-start 1)
-  (setq current-answer-start nil)
-  (setq current-callback-start nil)
-  (setq last-answer nil)
-  (setq connection nil)
-  (setq connection-server
+  (setq ocp-rpc-connection nil)
+  (setq ocp-rpc-connection-server
         (make-network-process
          :name "ocp-connection"
          :server 0 :host "127.0.0.1" :family 'ipv4 :service t :reuseaddr))
-  (set-process-sentinel connection-server 'connection-sentinel)
-  (set-process-filter connection-server 'connection-filter)
-  (set-process-query-on-exit-flag connection-server nil)
-  (set-process-coding-system connection-server 'emacs-mule 'emacs-mule)
-;; from the emacs-devel:
-;; The byte sequence of a buffer after decoded is
-;; always in emacs-mule (in emacs-unicode-2 branch, it's
-;; utf-8).  So, changing buffer-file-coding-system or any other
-;; coding-system-related variables doesn't affects
-;; position-bytes.
-  (process-contact connection-server :service)
+  (set-process-sentinel ocp-rpc-connection-server 'ocp-rpc-connection-sentinel)
+  (set-process-query-on-exit-flag ocp-rpc-connection-server nil)
+  (let ((internal
+         ;; try to be compatible with older Emacs
+         (if (coding-system-p 'emacs-internal) 'emacs-internal 'emacs-mule)))
+    (set-process-coding-system ocp-rpc-connection-server internal internal))
+  (process-contact ocp-rpc-connection-server :service)
   )
-(defconst typerex-version "1.0.0rc1"
+(defconst typerex-version "1.0.1"
   "Version of TypeRex")
 ;;; ocp.el --- Caml mode for (X)Emacs.
 
@@ -774,15 +696,39 @@ buffer to display the question if it is too long."
   "Support for the OCaml language."
   :group 'languages)
 
+(defgroup typerex-syntax-coloring nil
+  "Syntax coloring using Font Lock."
+  :group 'ocp)
+
+(defgroup typerex-tuareg-faces nil
+  "Special faces for Tuareg syntax coloring."
+  :group 'typerex-syntax-coloring)
+
+(defgroup typerex-indent nil
+  "TypeRex indentation configuration."
+  :group 'ocp)
+
+(defgroup typerex-auto-complete nil
+  "TypeRex auto completion."
+  :group 'ocp)
+
+(defgroup typerex-interactive nil
+  "TypeRex interactive interpreter configuration."
+  :group 'ocp)
+
+(defgroup typerex-misc nil
+  "TypeRex miscellaneous configuration."
+  :group 'ocp)
+
 ;; Comments
 
 (defcustom typerex-indent-leading-comments t
   "*If true, indent leading comment lines (starting with `(*') like others."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
 
 (defcustom typerex-indent-comments t
   "*If true, automatically align multi-line comments."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
 
 (defcustom typerex-comment-end-extra-indent 0
   "*How many spaces to indent a leading comment end `*)'.
@@ -791,7 +737,7 @@ If you expect comments to be indented like
           ...
          *)
 even without leading `*', use `typerex-comment-end-extra-indent' = 1."
-  :group 'ocp
+  :group 'typerex-indent
   :type '(radio :extra-offset 8
                 :format "%{Comment End Extra Indent%}:
    Comment alignment:\n%v"
@@ -813,14 +759,14 @@ indented like
           ...
          *)
 \(without leading `*'), set `typerex-comment-end-extra-indent' to 1."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
 
 (defcustom typerex-leading-star-in-doc nil
   "*Enable automatic intentation of documentation comments of the form
         (**
          * ...
          *)"
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
 
 ;; Indentation defaults
 
@@ -830,11 +776,11 @@ indented like
 Global indentation variable (large values may lead to indentation overflows).
 When no governing keyword is found, this value is used to indent the line
 if it has to."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-support-camllight nil
   "*If true, handle Caml Light character syntax (incompatible with labels)."
-  :group 'ocp :type 'boolean
+  :group 'typerex-indent :type 'boolean
   :set '(lambda (var val)
           (setq typerex-support-camllight val)
           (when (boundp 'typerex-mode-syntax-table)
@@ -843,7 +789,7 @@ if it has to."
 
 (defcustom typerex-support-metaocaml nil
   "*If true, handle MetaOCaml syntax."
-  :group 'ocp :type 'boolean
+  :group 'typerex-indent :type 'boolean
   :set '(lambda (var val)
           (setq typerex-support-metaocaml val)
           (when (boundp 'typerex-font-lock-keywords)
@@ -856,7 +802,7 @@ if it has to."
 As an example, set it to false when you have `typerex-with-indent' set to 0,
 and you want `let x = match ... with' and `match ... with' indent the
 same way."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
 
 (defcustom typerex-pipe-extra-unindent typerex-default-indent
   "*Extra backward indent for Caml lines starting with the `|' operator.
@@ -880,82 +826,82 @@ for `type' as well. For example, setting them to 0 (and leaving
     X -> ...
   | Y -> ...
   | Z -> ..."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-class-indent typerex-default-indent
   "*How many spaces to indent from a `class' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-sig-struct-align t
   "*Align `sig' and `struct' keywords with `module'."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
 
 (defcustom typerex-sig-struct-indent typerex-default-indent
   "*How many spaces to indent from a `sig' or `struct' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-method-indent typerex-default-indent
   "*How many spaces to indent from a `method' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-begin-indent typerex-default-indent
   "*How many spaces to indent from a `begin' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-for-while-indent typerex-default-indent
   "*How many spaces to indent from a `for' or `while' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-do-indent typerex-default-indent
   "*How many spaces to indent from a `do' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-fun-indent typerex-default-indent
   "*How many spaces to indent from a `fun' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-function-indent typerex-default-indent
   "*How many spaces to indent from a `function' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-if-then-else-indent typerex-default-indent
   "*How many spaces to indent from an `if', `then' or `else' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-let-indent typerex-default-indent
   "*How many spaces to indent from a `let' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-in-indent 0 ; typerex-default-indent
   "*How many spaces to indent from a `in' keyword.
 Upstream <http://caml.inria.fr/resources/doc/guides/guidelines.en.html>
 recommends 0, and this is what we default to since 2.0.1
 instead of the historical `typerex-default-indent'."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-match-indent typerex-default-indent
   "*How many spaces to indent from a `match' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-try-indent typerex-default-indent
   "*How many spaces to indent from a `try' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-with-indent typerex-default-indent
   "*How many spaces to indent from a `with' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-rule-indent typerex-default-indent
   "*How many spaces to indent from a `rule' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-type-indent typerex-default-indent
   "*How many spaces to indent from a `type' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-val-indent typerex-default-indent
   "*How many spaces to indent from a `val' keyword."
-  :group 'ocp :type 'integer)
+  :group 'typerex-indent :type 'integer)
 
 ;; Automatic indentation
 ;; Using abbrev-mode and electric keys
@@ -967,7 +913,7 @@ It makes use of `abbrev-mode'.
 
 Many people find eletric keywords irritating, so you can disable them by
 setting this variable to nil."
-  :group 'ocp :type 'boolean
+  :group 'typerex-indent :type 'boolean
   :set '(lambda (var val)
           (setq typerex-use-abbrev-mode val)
           (abbrev-mode val)))
@@ -977,7 +923,11 @@ setting this variable to nil."
 
 Many people find eletric keys irritating, so you can disable them in
 setting this variable to nil."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-indent :type 'boolean)
+
+(defcustom typerex-case-arrow-extra-indent 2
+  "*How many spaces to indent from a `->' keyword in a pattern match case."
+  :group 'typerex-indent :type 'integer)
 
 (defcustom typerex-electric-close-vector t
   "*Non-nil means electrically insert `|' before a vector-closing `]' or
@@ -986,7 +936,7 @@ setting this variable to nil."
 Many people find eletric keys irritating, so you can disable them in
 setting this variable to nil. You should probably have this on,
 though, if you also have `typerex-electric-indent' on."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-misc :type 'boolean)
 
 ;; TypeRex-Interactive
 ;; Configure via `typerex-mode-hook'
@@ -996,7 +946,7 @@ though, if you also have `typerex-electric-indent' on."
 upon evaluating an expression.
 
 See `comint-scroll-to-bottom-on-output' for details."
-  :group 'ocp :type 'boolean
+  :group 'typerex-interactive :type 'boolean
   :set '(lambda (var val)
           (setq typerex-interactive-scroll-to-bottom-on-output val)
           (when (boundp 'comint-scroll-to-bottom-on-output)
@@ -1005,49 +955,53 @@ See `comint-scroll-to-bottom-on-output' for details."
 (defcustom typerex-skip-after-eval-phrase t
   "*Non-nil means skip to the end of the phrase after evaluation in the
 Caml toplevel."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
 (defcustom typerex-interactive-read-only-input nil
   "*Non-nil means input sent to the Caml toplevel is read-only."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
 (defcustom typerex-interactive-echo-phrase t
   "*Non-nil means echo phrases in the toplevel buffer when sending
 them to the Caml toplevel."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
 (defcustom typerex-interactive-input-font-lock t
   "*Non nil means Font-Lock for toplevel input phrases."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
 (defcustom typerex-interactive-output-font-lock t
   "*Non nil means Font-Lock for toplevel output messages."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
 (defcustom typerex-interactive-error-font-lock t
   "*Non nil means Font-Lock for toplevel error messages."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
 (defcustom typerex-display-buffer-on-eval t
   "*Non nil means pop up the Caml toplevel when evaluating code."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-interactive :type 'boolean)
 
-(defcustom typerex-manual-url "http://pauillac.inria.fr/ocaml/htmlman/index.html"
-  "*URL to the Caml reference manual."
-  :group 'ocp :type 'string)
+(defcustom typerex-manual-url "http://caml.inria.fr/pub/docs/manual-ocaml/index.html"
+  "*URL to the OCaml reference manual."
+  :group 'typerex-misc :type 'string)
+
+(defcustom typerex-typerex-manual-url "http://www.typerex.org/manual-ide.html"
+  "*URL to the TypeRex user manual."
+  :group 'typerex-misc :type 'string)
 
 (defcustom typerex-browser 'browse-url
   "*Name of function that displays the Caml reference manual.
 Valid names are `browse-url', `browse-url-firefox', etc."
-  :group 'ocp)
+  :group 'typerex-misc)
 
-(defcustom typerex-library-path "/usr/local/lib/ocaml/"
-  "*Path to the Caml library."
-  :group 'ocp :type 'string)
+(defcustom typerex-library-path nil
+  "*Path to the Caml library. If nil, get it from the TypeRex server"
+  :group 'typerex-misc :type 'string)
 
 (defcustom typerex-definitions-max-items 30
   "*Maximum number of items a definitions menu can contain."
-  :group 'ocp :type 'integer)
+  :group 'typerex-misc :type 'integer)
 
 (defvar typerex-options-list
   '(("Automatic indentation of leading keywords" . 'typerex-use-abbrev-mode)
@@ -1080,10 +1034,6 @@ Valid names are `browse-url', `browse-url-firefox', etc."
   (defconst typerex-use-syntax-ppss (fboundp 'syntax-ppss)
     "*If nil, use our own parsing and caching."))
 
-(defgroup typerex-faces nil
-  "Special faces for the TypeRex mode."
-  :group 'ocp)
-
 (defconst typerex-faces-inherit-p
   (and (boundp 'face-attribute-name-alist)
        (assq :inherit face-attribute-name-alist)))
@@ -1092,7 +1042,7 @@ Valid names are `browse-url', `browse-url-firefox', etc."
   '((((background light)) (:foreground "blue" :bold t))
     (t (:foreground "orange" :bold t)))
   "Face description for governing/leading keywords."
-  :group 'typerex-faces)
+  :group 'typerex-tuareg-faces)
 (defvar typerex-font-lock-governing-face
   'typerex-font-lock-governing-face)
 
@@ -1101,7 +1051,7 @@ Valid names are `browse-url', `browse-url-firefox', etc."
      (:foreground "darkblue" :background "lightgray" :bold t))
     (t (:foreground "steelblue" :background "darkgray" :bold t)))
   "Face description for MetaOCaml staging operators."
-  :group 'typerex-faces)
+  :group 'typerex-tuareg-faces)
 (defvar typerex-font-lock-multistage-face
   'typerex-font-lock-multistage-face)
 
@@ -1109,14 +1059,14 @@ Valid names are `browse-url', `browse-url-firefox', etc."
   '((((background light)) (:foreground "brown"))
     (t (:foreground "khaki")))
   "Face description for all operators."
-  :group 'typerex-faces)
+  :group 'typerex-tuareg-faces)
 (defvar typerex-font-lock-operator-face
   'typerex-font-lock-operator-face)
 
 (defface typerex-font-lock-error-face
   '((t (:foreground "yellow" :background "red" :bold t)))
   "Face description for all errors reported to the source."
-  :group 'typerex-faces)
+  :group 'typerex-tuareg-faces)
 (defvar typerex-font-lock-error-face
   'typerex-font-lock-error-face)
 
@@ -1125,7 +1075,7 @@ Valid names are `browse-url', `browse-url-firefox', etc."
      (:foreground "blue4"))
     (t (:foreground "cyan")))
   "Face description for all toplevel outputs."
-  :group 'typerex-faces)
+  :group 'typerex-tuareg-faces)
 (defvar typerex-font-lock-interactive-output-face
   'typerex-font-lock-interactive-output-face)
 
@@ -1135,9 +1085,23 @@ Valid names are `browse-url', `browse-url-firefox', etc."
     '((((background light)) (:foreground "red3"))
       (t (:foreground "red2"))))
   "Face description for all toplevel errors."
-  :group 'typerex-faces)
+  :group 'typerex-tuareg-faces)
 (defvar typerex-font-lock-interactive-error-face
   'typerex-font-lock-interactive-error-face)
+
+;; caml-faces copied from caml-font.el:
+(defvar caml-font-stop-face
+  (progn
+    (make-face 'caml-font-stop-face)
+    (set-face-foreground 'caml-font-stop-face "White")
+    (set-face-background 'caml-font-stop-face "Red")
+    'caml-font-stop-face))
+
+(defvar caml-font-doccomment-face
+  (progn
+    (make-face 'caml-font-doccomment-face)
+    (set-face-foreground 'caml-font-doccomment-face "Red")
+    'caml-font-doccomment-face))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                            Support definitions
@@ -1412,7 +1376,19 @@ Valid names are `browse-url', `browse-url-firefox', etc."
   "*Display fun and -> and such using symbols in fonts.
 This may sound like a neat trick, but note that it can change the
 alignment and can thus lead to surprises."
-  :group 'ocp :type 'boolean)
+  :group 'typerex-syntax-coloring :type 'boolean)
+
+(defcustom ocp-syntax-coloring t
+  "If true, enable Font-Lock syntax highlighting"
+  :group 'typerex-syntax-coloring :type '(boolean))
+
+(defcustom ocp-theme nil
+  "coloring theme (one of syntactic, tuareg_like, and tuareg).
+  - syntactic uses the new OCP Faces
+  - tuareg_like and tuareg uses the TypeRex Face, which are the Tuareg
+  tuareg_like is a full re-implementation of Tuareg coloring, with not
+  exactly the same bugs. tuareg is the unchanged tuareg implementation."
+  :group 'typerex-syntax-coloring :type '(string))
 
 (defvar typerex-font-lock-symbols-alist
   (cond ((and (fboundp 'make-char) (fboundp 'charsetp) (charsetp 'symbol))
@@ -1722,63 +1698,29 @@ Regexp match data 0 points to the chars."
 
 ;;;###autoload
 (defun typerex-mode ()
-  "Major mode for editing Caml code.
+  "Major mode for OCaml programming.
 
-Dedicated to Emacs and XEmacs, version 21 and higher. Provides
-- automatic indentation and compilation interface (Tuareg implementation)
+Dedicated to Emacs, (tested with version 23.2.1). Provides
 - font/color highlighting (new implementation)
-- automatic identifier completion (experimental)
+- automatic identifier completion (experimental, disabled by default)
 - identifier browsing
 - refactoring
+And the Tuareg-mode features, including
+- automatic indentation
+- compilation, interactive interpreter, and debugger embedding
 
 Report bugs, remarks and questions to OCamlPro.
 
 
-For customization purposes, you should use `typerex-mode-hook'
-\(run for every file) or `typerex-load-hook' (run once) and not patch
-the mode itself. You should add to your configuration file something like:
-  (add-hook 'typerex-mode-hook
-            (lambda ()
-               ... ; your customization code
-            ))
-For example you can change the indentation of some keywords, the
-`electric' flags, Font-Lock colors... Every customizable variable is
-documented, use `C-h-v' or look at the mode's source code.
-
-`custom-ocp.el' is a sample customization file for standard changes.
-You can append it to your `.emacs' or use it as a tutorial.
+For customization purposes, you can use `typerex-mode-hook'
+\(run for every file) or `typerex-load-hook' (run once). See the Tuareg-mode
+documentation.
 
 `M-x camldebug' FILE starts the Caml debugger camldebug on the executable
 FILE, with input and output in an Emacs buffer named *camldebug-FILE*.
 
 A TypeRex Interactive Mode to evaluate expressions in a toplevel is included.
 Type `M-x typerex-run-caml' or see special-keys below.
-
-For the best indentation experience, some elementary rules must be followed.
-  - Because the `function' keyword has a special indentation (to handle
-    case matches) use the `fun' keyword when no case match is performed.
-  - In OCaml, `;;' is no longer necessary for correct indentation,
-    except before top level phrases not introduced by `type', `val', `let'
-    etc. (i.e., phrases used for their side-effects or to be executed
-    in a top level.)
-  - Long sequences of `and's may slow down indentation slightly, since
-    some computations (few) require to go back to the beginning of the
-    sequence. Some very long nested blocks may also lead to slow
-    processing of `end's, `else's, `done's...
-  - Multiline strings are handled properly, but you may prefer string
-    concatenation `^' to break long strings (the C-j keystroke can help).
-  - Comment indentation is often a matter of taste and context, yet
-    sophisticated heuristics provide reasonable indentation in most cases.
-    When inserting a comment right before the code it refers to, it is
-    generally expected that this comment will be aligned with the folowing
-    code; to enforce this, leave a blank line before the comment.
-
-Known bugs:
-  - When writting a line with mixed code and comments, avoid putting
-    comments at the beginning or middle of the text. More precisely,
-    writing comments immediately after `=' or parentheses then writing
-    some more code on the line leads to indentation errors. You may write
-    `let x (* blah *) = blah' but should avoid `let x = (* blah *) blah'.
 
 Short cuts for the TypeRex mode:
 \\{typerex-mode-map}
@@ -1829,7 +1771,8 @@ Short cuts for interactions with the toplevel:
           imenu-extract-index-name-function 'typerex-imenu-extract-index-name))
 
   ;; Hooks for typerex-mode, use them for typerex-mode configuration
-  (typerex-install-font-lock)
+  (if (and ocp-syntax-coloring (not (string= ocp-theme "caml")))
+      (typerex-install-font-lock))
   (run-hooks 'typerex-mode-hook)
   (when typerex-use-abbrev-mode (abbrev-mode 1))
   (message nil))
@@ -1914,9 +1857,15 @@ Short cuts for interactions with the toplevel:
 ;; compilation-error-regexp-alist do not match the error messages when
 ;; the language is not English. Hence we add a regexp.
 
+;; The tuareg-mode regexp:
+;; (defconst typerex-error-regexp
+;;   "^[^\0-@]+ \"\\([^\"\n]+\\)\", [^\0-@]+ \\([0-9]+\\)[-,:]"
+;;   "Regular expression matching the error messages produced by (o)camlc.")
+
+;; The caml-mode regexp is told to be better for stacktraces:
 (defconst typerex-error-regexp
-  "^[^\0-@]+ \"\\([^\"\n]+\\)\", [^\0-@]+ \\([0-9]+\\)[-,:]"
-  "Regular expression matching the error messages produced by (o)camlc.")
+  "^[ A-\377]+ \"\\([^\"\n]+\\)\", [A-\377]+ \\([0-9]+\\)[-,:]"
+  "Regular expression matching the error messages produced by ocamlc.")
 
 (when (boundp 'compilation-error-regexp-alist)
   (or (assoc typerex-error-regexp
@@ -2652,12 +2601,16 @@ If found, return the actual text of the keyword or operator."
         (current-column))
        ((string= kwop "method")
         (+ (typerex-paren-or-indentation-column) typerex-method-indent))
-       ((string= kwop "->")
+       ((string= kwop "->") ;; -> ...; \n []
         (if (save-excursion
               (typerex-find-arrow-match)
               (or (looking-at "\\<fun\\>\\||")
                   (looking-at (typerex-give-extra-unindent-regexp))))
-            (typerex-paren-or-indentation-indent)
+	    (progn
+	      (if (or (string= (match-string 0) "|"))
+		  (+ typerex-case-arrow-extra-indent (typerex-paren-or-indentation-indent))
+		(- (+ typerex-case-arrow-extra-indent (typerex-paren-or-indentation-indent))
+		   typerex-pipe-extra-unindent)))
           (typerex-find-semicolon-match)))
        ((string= kwop "end")
         (typerex-find-match)
@@ -2998,9 +2951,9 @@ Returns t iff skipped to indentation."
 (defun typerex-compute-arrow-indent (start-pos)
   (let (kwop pos)
     (save-excursion (setq kwop (typerex-find-arrow-match) pos (point)))
-    (cond ((string= kwop "|")
+    (cond ((string= kwop "|") ;; | ... ->
            (typerex-find-arrow-match)
-           (+ (current-column) typerex-default-indent))
+           (+ (current-column) typerex-default-indent typerex-case-arrow-extra-indent))
           ((or (string= kwop "val")
                (string= kwop "let"))
            (goto-char pos)
@@ -3047,7 +3000,7 @@ Returns t iff skipped to indentation."
 
 (defun typerex-compute-keyword-indent (kwop leading-operator start-pos)
   (cond ((string= kwop ";")
-         (if (looking-at (typerex-no-code-after ";"))
+         (if (looking-at (typerex-no-code-after ";")) ;; previous line ends with `;'
              (let* ((pos (point)) (indent (typerex-find-semicolon-match)))
                (if (looking-at typerex-phrase-regexp-1)
                    (progn
@@ -3212,7 +3165,7 @@ Returns t iff skipped to indentation."
                (typerex-indent-from-paren leading-operator start-pos)
              (+ typerex-default-indent
                 (typerex-indent-from-paren leading-operator start-pos))))
-          ((looking-at "->")
+          ((looking-at "->") ;; line after ->. A case or arrow type with a new line 
            (typerex-compute-arrow-indent start-pos))
           ((looking-at (typerex-give-keyword-regexp))
            (typerex-compute-keyword-indent kwop leading-operator start-pos))
@@ -3857,13 +3810,39 @@ or indent all lines in the current phrase."
   (caml-complete arg)
   (modify-syntax-entry ?_ "_" typerex-mode-syntax-table))
 
+(defun typerex--try-find-alternate-file (partial-name extension)
+  (let* ((filename (concat partial-name extension))
+         (buffer (get-file-buffer filename))
+         (what (cond 
+                ((string= extension ".ml") "implementation")
+                ((string= extension ".mli") "interface"))))
+    (if buffer
+        (progn (switch-to-buffer buffer) t)
+      (if (file-exists-p filename)
+          (progn (find-file filename) t)
+        (when (and (not (string= extension ".mll"))
+                   (y-or-n-p 
+                    (format "Create %s file (%s)" what 
+                            (file-name-nondirectory filename))))
+          (find-file filename)))
+      nil)))
+
 (defun typerex-find-alternate-file ()
   "Switch Implementation/Interface."
   (interactive)
   (let ((name (buffer-file-name)))
-    (when (string-match "\\`\\(.*\\)\\.ml\\(i\\)?\\'" name)
-      (find-file (concat (typerex-match-string 1 name)
-                         (if (match-beginning 2) ".ml" ".mli"))))))
+    (when (string-match "\\`\\(.*\\)\\.ml\\([il]\\)?\\'" name)
+      (let ((partial-name (typerex-match-string 1 name)))
+        (let ((c (match-string 2 name)))
+          (cond 
+           ((string= "i" c) (unless (typerex--try-find-alternate-file 
+                                     partial-name ".mll")
+                              (typerex--try-find-alternate-file
+                               partial-name ".ml")))
+           ((string= "l" c) (typerex--try-find-alternate-file 
+                             partial-name ".mli"))
+           ((eq nil c) (typerex--try-find-alternate-file 
+                             partial-name ".mli"))))))))
 
 (defun typerex-ensure-space ()
   (let ((prec (preceding-char)))
@@ -4368,10 +4347,15 @@ Short cuts for interaction within the toplevel:
 ;; From M. Quercia
 
 (defun typerex-browse-manual ()
-  "*Browse Caml reference manual."
+  "*Browse OCaml reference manual."
   (interactive)
   (setq typerex-manual-url (read-from-minibuffer "URL: " typerex-manual-url))
   (funcall typerex-browser typerex-manual-url))
+
+(defun typerex-browse-typerex-manual ()
+  "*Browse TypeRex user manual."
+  (interactive)
+  (funcall typerex-browser typerex-typerex-manual-url))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                             Browse Library
@@ -4594,9 +4578,6 @@ key-bindings or hack Font-Lock keywords...")
 (run-hooks 'typerex-load-hook)
 
 (provide 'typerex)
-;; For compatibility with caml support modes
-;; you may also link caml.el to ocp.el
-(provide 'caml)
 (defun ocp-rename ()
   "Rename the current identifier"
   (interactive)
@@ -4607,18 +4588,6 @@ key-bindings or hack Font-Lock keywords...")
   "Rename the toplevel module defined by the current source file"
   (interactive)
   (checked-string-command "rename-toplevel"))
-
-
-(defun ocp-grep ()
-  "Show all definitions and references for the current ident"
-  (interactive)
-  (checked-string-command "grep"))
-
-
-(defun ocp-grep-toplevel ()
-  "Grep the toplevel module defined by the current source file"
-  (interactive)
-  (checked-string-command "grep-toplevel"))
 
 
 (defun ocp-undo ()
@@ -4671,10 +4640,109 @@ key-bindings or hack Font-Lock keywords...")
   (define-key (current-local-map) [(control o) (d)] 'ocp-goto-definition)
   (define-key (current-local-map) [(control o) (control t)] 'ocp-callback-test)
   (define-key (current-local-map) [(control o) (u)] 'ocp-undo)
-  (define-key (current-local-map) [(control o) (t) (g)] 'ocp-grep-toplevel)
-  (define-key (current-local-map) [(control o) (g)] 'ocp-grep)
   (define-key (current-local-map) [(control o) (t) (r)] 'ocp-rename-toplevel)
   (define-key (current-local-map) [(control o) (r)] 'ocp-rename))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;                                                                        ;
+;                        TypeRex OCaml Studio                            ;
+;                                                                        ;
+;                           Wojciech Meyer                               ;
+;                                                                        ;
+;  Copyright 2011-2012 INRIA Saclay - Ile-de-France / OCamlPro           ;
+;  All rights reserved.  This file is distributed under the terms of     ;
+;  the GNU Public License version 3.0.                                   ;
+;                                                                        ;
+;  TypeRex is distributed in the hope that it will be useful,            ;
+;  but WITHOUT ANY WARRANTY; without even the implied warranty of        ;
+;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         ;
+;  GNU General Public License for more details.                          ;
+;                                                                        ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; The simplest incremental compilation using flymake.
+;; Uses ocamlbuild even when the project doesn't use it.
+;; The root of the project is where the .typerex file is found.
+;; This implementation handles OCaml style multiline diagnostics,
+;; and doesn't need any external scripts.
+
+;; Interesting package to install would be flymake-cursor which provides
+;; a mode-line updates with the last diagnostic.
+
+(defcustom ocp-flymake-available nil
+  "Enable \"on-the-fly compilation\" button "
+  :group 'typerex-misc)
+
+(eval-when-compile (require 'flymake))
+
+(when ocp-flymake-available
+
+(require 'flymake)
+
+  (progn
+    ;; Add OCaml regex error message patterns
+    (add-to-list 
+     'flymake-err-line-patterns
+     `(,(concat "File \"\\(.*\\)\", line \\([0-9]+\\), characters \\([0-9]+\\)"
+                "--?\\([0-9]+\\):\\(Error\\|Warning\\): \\(.*\\)$") 1 2 3 6))
+
+    ;; Be sensitive on .ml files
+    (add-to-list 
+     'flymake-allowed-file-name-masks 
+     '("\\.ml\\'" ocp-flymake-init))
+
+    ;; Finally this will enable flymake support immediately after typerex is loaded
+    ;; in particila set the local multiline flags, to allow multiline OCaml
+    ;; diagnostics
+    (add-hook
+     'typerex-mode-hook
+     '(lambda ()
+        (set (make-local-variable 'multiline-flymake-mode) t))))
+
+(defun ocp-flymake-init ()
+  "Create syntax check ocamlbuild command line for TypeRex projects."
+  (let* ((args nil)
+         ;; first find the root of the project, this is where .typerex file
+         (dir (locate-dominating-file buffer-file-name ".typerex"))
+	 (buildfile-dir (flymake-init-find-buildfile-dir dir ".typerex"))
+         ;; we need to provide a relative path for ocamlbuild
+         (source-file-name (file-relative-name buffer-file-name dir))
+         ;; we replace the source code name with the target for ocamlbuild
+         (source (replace-regexp-in-string "\.ml$" ".cmo" source-file-name)))
+    ;; finally build the command it consists of the list name of the command, 
+    ;; list of flags, and the calculated working directory
+    (list "ocamlbuild" (list "-use-ocamlfind" source) dir)))
+
+
+;; Code below is taken from the Emacs wiki: http://www.emacswiki.org/emacs/FlymakeHaskell
+;; OCaml compiler diagnostics are multiline and flymake that I checked (0.3) that comes
+;; with Emacs assumes single line error/warnings messages
+;; We use buffer local variable to enable that behavior.
+
+(defvar multiline-flymake-mode
+  "Decides whetever to join lines, during flymake parsing of the build command output."
+  nil)
+
+(defvar flymake-split-output-multiline nil)
+
+;; This advice will set the special flags during split-output invocation
+;; that deals with splitting multiline output
+(defadvice flymake-split-output
+  (around flymake-split-output-multiline activate protect)
+  (if multiline-flymake-mode
+      (let ((flymake-split-output-multiline t))
+        ad-do-it)
+    ad-do-it))
+    
+;; here we handle, what was set before, dynamic scoping is not nice, but that's
+;; how Emacs works
+(defadvice flymake-split-string
+  (before flymake-split-string-multiline activate)
+  (when flymake-split-output-multiline
+    (ad-set-arg 1 "^\\s *$")))
+
+)
+
+(provide 'ocp-flymake)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                                        ;
 ;                        TypeRex OCaml Studio                            ;
@@ -4692,64 +4760,65 @@ key-bindings or hack Font-Lock keywords...")
 ;                                                                        ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Tokenization and Font-lock with ocp-wizard
+;; Tokenization and Font-lock with ocp-wizard
 
-; This file registers hooks to let ocp-wizard know about the current
-; buffer contents, enabling completion and a fontification.
-
-(defcustom ocp-syntax-coloring t
-  "If true, use new TypeRex coloring rather than old tuareg mode"
-  :group 'ocp :type '(boolean))
-
-(defcustom ocp-theme nil "coloring theme (one of tuareg_like, syntactic)"
-  :group 'ocp :type '(string))
+;; This file registers hooks to let ocp-wizard know about the current
+;; buffer contents, enabling completion and a fontification.
 
 (defcustom ocp-auto-complete nil
   "If true, enable TypeRex auto-completion"
-  :group 'ocp :type '(boolean))
+  :group 'typerex-auto-complete :type '(boolean))
 
-; If buffer-bytes = 0, then next update will (re)set the buffer
-; contents on the server.
-(defvar buffer-bytes 0 "length as known to ocp-wizard")
-(make-variable-buffer-local 'buffer-bytes)
+(defcustom ocp-pre-cache t
+  "If true, pre-cache the cmt to prevent pausing at first
+completion. We use a counter to avoid the deadlocks that used to
+happen when either:
+ - Emacs is started on several files simultaneously
+ - User begins typing during Emacs startup."
+  :group 'typerex-auto-complete :type '(boolean))
 
-; If start <= end then this region has been modified
-(defvar buffer-modified-start 1)
-(make-variable-buffer-local 'buffer-modified-start)
-(defvar buffer-modified-end 1)
-(make-variable-buffer-local 'buffer-modified-end)
+;; If ocp-buffer-bytes = 0, then next update will (re)set the buffer
+;; contents on the server.
+(defvar ocp-buffer-bytes 0 "length as known to ocp-wizard")
+(make-variable-buffer-local 'ocp-buffer-bytes)
 
-(defun update-modified (begin end &optional old-len)
+;; If start <= end then this region has been modified
+(defvar ocp-buffer-modified-start 1)
+(make-variable-buffer-local 'ocp-buffer-modified-start)
+(defvar ocp-buffer-modified-end 1)
+(make-variable-buffer-local 'ocp-buffer-modified-end)
+
+(defun ocp-update-modified (begin end &optional old-len)
   "Enlarge the recorded modified region according to the given
 parameters. This function is set as an after-change hook, as well
 as a find-file-hook (with point-min and point-max as parameters)."
-(unless (eq buffer-bytes 0)
+(unless (eq ocp-buffer-bytes 0)
   (if (eq old-len nil) (setq old-len 0))
-;  (message "update-modified [%d, %d[ (old-len=%d)" begin end old-len)
-  (if (<= buffer-modified-start buffer-modified-end)
+;;  (message "ocp-update-modified [%d, %d[ (old-len=%d)" begin end old-len)
+  (if (<= ocp-buffer-modified-start ocp-buffer-modified-end)
       (progn
-        (setq buffer-modified-start (min buffer-modified-start begin))
-        (setq buffer-modified-end
+        (setq ocp-buffer-modified-start (min ocp-buffer-modified-start begin))
+        (setq ocp-buffer-modified-end
               (max end
-                   (if (<= begin buffer-modified-end)
+                   (if (<= begin ocp-buffer-modified-end)
                        (let ((growth (- (- end begin) old-len)))
-                         (+ buffer-modified-end growth))
-                     buffer-modified-end))))
-    (setq buffer-modified-start begin)
-    (setq buffer-modified-end end)
+                         (+ ocp-buffer-modified-end growth))
+                     ocp-buffer-modified-end))))
+    (setq ocp-buffer-modified-start begin)
+    (setq ocp-buffer-modified-end end)
     ;; See auto-completion
     (if (fboundp 'discard-completion-data) (discard-completion-data)))
-;  (message "-> [%d, %d["  buffer-modified-start  buffer-modified-end)
+;;  (message "-> [%d, %d["  ocp-buffer-modified-start  ocp-buffer-modified-end)
   ))
 
 (defun reset-tokenization ()
   "Ensure that the next change committed to the server
 will (re-)load the whole buffer"
-  (setq buffer-bytes 0))
+  (setq ocp-buffer-bytes 0))
 
-; We use this hack to get the absolute filename before the
-; buffer-local variable has been initialized (when fontifying for the
-; first time).
+;; We use this hack to get the absolute filename before the
+;; buffer-local variable has been initialized (when fontifying for the
+;; first time).
 (defun filename-of-buffer-name (buffer-name directory)
   "Try to get the absolute filename for a buffer name and directory name"
   (let* ((len (length buffer-name))
@@ -4761,23 +4830,25 @@ will (re-)load the whole buffer"
             buffer-name)))
     (expand-file-name filename directory)))
 
-(defun is-ocaml-buffer ()
-  (let* ((filename (filename-of-buffer-name (buffer-name) default-directory))
-         (len (length filename)))
-    (and (> len 4)
-         (or
-          (string= (substring filename (- len 3)) ".ml")
-          (string= (substring filename (- len 4)) ".mli")
-          (string= (substring filename (- len 4)) ".mll")
-          (string= (substring filename (- len 4)) ".mly")))))
+;; (defcustom typerex-extension-list '("ml" "mli" "mll" "mly")
+;;   "File extensions which enable TypeRex"
+;;   :group 'ocp)
 
-(defun modify-region
+;; (defun is-ocaml-buffer ()
+;;   (let* ((filename (filename-of-buffer-name (buffer-name) default-directory))
+;;          (len (length filename)))
+;;     (member (file-name-extension filename) typerex-extension-list)))
+
+(defun is-ocaml-buffer ()
+  (not (string= (buffer-name) typerex-interactive-buffer-name)))
+
+(defun ocp-modify-region
   (start end start-bytes end-bytes old-length-bytes first-time)
   "Commit a region modification to the server, and return the
 string result, which is either the fontification command, or
 OK. All positions count from 1."
-;  (message "modify-region [%d, %d[, old=%d, first-time=%s"
-;           start-bytes end-bytes old-length-bytes first-time)
+;;  (message "ocp-modify-region [%d, %d[, old=%d, first-time=%s"
+;;           start-bytes end-bytes old-length-bytes first-time)
   (let* ((filename (filename-of-buffer-name (buffer-name) default-directory))
          (time-before (float-time)))
     (owz-string-command
@@ -4791,89 +4862,87 @@ OK. All positions count from 1."
              "\n"
              (buffer-substring start end)))))
 
-(defun try-once-modify-changed-region ()
+(defun ocp-try-once-modify-changed-region ()
   "Commit the currently changed region (and set the state to
 unchanged)."
-;  (message "typerex-fontify-changed-region")
-  (if (eq buffer-bytes 0)
+;;  (message "typerex-fontify-changed-region")
+  (if (eq ocp-buffer-bytes 0)
       (progn
-        (setq buffer-modified-start (point-min))
-        (setq buffer-modified-end (point-max))))
+        (setq ocp-buffer-modified-start (point-min))
+        (setq ocp-buffer-modified-end (point-max))))
   (let* ((last-pos (+ (buffer-size) 1))
          (last-pos-bytes (position-bytes last-pos))
-         (new-buffer-bytes (- last-pos-bytes 1))
-         (growth-bytes (- new-buffer-bytes buffer-bytes))
-         (first-time (eq buffer-bytes 0)))
-;  (message "modified-start=%d, modified-end=%d" buffer-modified-start buffer-modified-end)
-    (if (<= buffer-modified-start buffer-modified-end)
+         (new-ocp-buffer-bytes (- last-pos-bytes 1))
+         (growth-bytes (- new-ocp-buffer-bytes ocp-buffer-bytes))
+         (first-time (eq ocp-buffer-bytes 0)))
+;;  (message "modified-start=%d, modified-end=%d" ocp-buffer-modified-start ocp-buffer-modified-end)
+    (if (<= ocp-buffer-modified-start ocp-buffer-modified-end)
         (let*
-            ((begin-bytes (position-bytes buffer-modified-start))
-             (end-bytes (position-bytes buffer-modified-end))
+            ((begin-bytes (position-bytes ocp-buffer-modified-start))
+             (end-bytes (position-bytes ocp-buffer-modified-end))
              (old-length-bytes (- (- end-bytes begin-bytes) growth-bytes)))
-          (setq buffer-bytes new-buffer-bytes)
+          (setq ocp-buffer-bytes new-ocp-buffer-bytes)
           (let ((res
-                 (modify-region
-                  buffer-modified-start buffer-modified-end
+                 (ocp-modify-region
+                  ocp-buffer-modified-start ocp-buffer-modified-end
                   begin-bytes end-bytes old-length-bytes first-time)))
-            (setq buffer-modified-start last-pos)
-            (setq buffer-modified-end 1)
+            (setq ocp-buffer-modified-start last-pos)
+            (setq ocp-buffer-modified-end 1)
             res))
       nil)))
 
-(defun modify-changed-region ()
-  "Same as try-once-modify-change-region, but in case of error,
+(defun ocp-modify-changed-region ()
+  "Same as ocp-try-once-modify-change-region, but in case of error,
 try to reset tokenization. Actual arguments are ignored; the
-modifications are tracked explicitely thanks to update-modified."
+modifications are tracked explicitely thanks to ocp-update-modified."
   (condition-case e
-      (try-once-modify-changed-region)
+      (ocp-try-once-modify-changed-region)
     (error
      (progn
        (message "Error during tokenization: %s" e)
        (message "Trying to reset tokenization")
        (reset-tokenization)
        (condition-case e
-           (try-once-modify-changed-region)
+           (ocp-try-once-modify-changed-region)
          (error
           (message "Error again: %s\nAbort" e)
           nil))))))
 
 (defun typerex-fontify-changed-region (begin end &optional verbose)
   "Commit any pending modifications and re-fontify the modified part"
-  (modify-changed-region)
-;        (let ((compute-time (- (float-time) time-before)))
-;          (if (> compute-time 0.01)
-;              (message "fontification computed in %f seconds" compute-time)))
+  (ocp-modify-changed-region)
   (let ((command
          (owz-string-command
           (concat "fontify-buffer " (buffer-name)))))
-;      (message "fontification command: %s" command)
     (condition-case e
         (eval (read command))
-;        (let ((fontification-time (- (float-time) time-before)))
-;          (if (> fontification-time 0.01)
-;              (message "fontifying done in %f seconds" fontification-time)))
       (error (message "Error during fontification: %s" e)))))
 
-(defun modify-only-changed-region (begin end &optional verbose)
-  "Commit any pending modifications"
-  (modify-changed-region))
-
-(defun pre-cache-buffer ()
-  (message "Pre-caching program data...")
-  (owz-string-command (concat "pre-cache-buffer " (buffer-name))))
+;; This is a nice trick which prevents long pauses.
+(defun ocp-pre-cache-buffer (buffer)
+  (run-with-idle-timer
+   0 nil
+   (lambda (buffer) (owz-string-command (concat "pre-cache-buffer " buffer)))
+   buffer))
 
 ;; Install modification hooks and font-lock function
 (add-hook
  'typerex-mode-hook
  (lambda ()
+   (when (and ocp-syntax-coloring (string= ocp-theme "caml"))
+     (if (require 'caml-font nil t)
+         (eval '(caml-font-set-font-lock))
+       (message "caml-font not found")))
    (if (is-ocaml-buffer)
        (progn
          ;; If either coloring or completion are enabled, then track
          ;; modifications in each TypeRex-enabled buffer.
-         (if (or ocp-syntax-coloring ocp-auto-complete)
+         (if (or (and ocp-syntax-coloring
+                      (not (member ocp-theme '("tuareg" "caml"))))
+                 ocp-auto-complete)
              (progn
                ;; Record each modification
-               (add-hook 'after-change-functions 'update-modified nil t)
+               (add-hook 'after-change-functions 'ocp-update-modified nil t)
                ;; Reset fontification when visiting a file, since it may be
                ;; a C-x C-w and change the buffer name
                (add-hook 'find-file-hook 'reset-tokenization nil t)))
@@ -4881,19 +4950,28 @@ modifications are tracked explicitely thanks to update-modified."
          ;; typerex-fontify-changed-region, which we register by redefining
          ;; typerex-install-font-lock.
          (make-local-variable 'font-lock-fontify-region-function)
-         (if ocp-syntax-coloring
+         (if (and ocp-syntax-coloring
+                  (not (member ocp-theme '("tuareg" "caml"))))
              (setq font-lock-fontify-region-function
                    'typerex-fontify-changed-region))
-         ;; If auto-completion is enabled), modifications
-         ;; are also commited after each change (this hook is appended).
-;         (if ocp-auto-complete
-;             (add-hook 'after-change-functions 'modify-only-changed-region t t))
-         (if ocp-auto-complete
+         ;; If auto-completion is enabled, modifications are also
+         ;; commited when completion is invoked (see
+         ;; ocp-get-completion-data)
+
+         ;; If auto-completion is enabled, we pre-load the cmt to give
+         ;; a smoother impression.
+         (if (and ocp-auto-complete ocp-pre-cache)
              (add-hook
               'find-file-hook
-              (lambda () (run-with-idle-timer 0 nil 'pre-cache-buffer))
+              (lambda () (ocp-pre-cache-buffer (buffer-name)))
               t t))
          ))))
+
+;; Flymake workaround (incompatible with syntax coloring)
+(defadvice flymake-get-file-name-mode-and-masks (around ocp-flymake-fix activate)
+  (condition-case nil
+      ad-do-it
+    (error nil)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                                        ;
 ;                        TypeRex OCaml Studio                            ;
@@ -4911,19 +4989,19 @@ modifications are tracked explicitely thanks to update-modified."
 ;                                                                        ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; ocp-wizard additional conventions + server startup
+;; ocp-wizard additional conventions + server startup
 
-;   Functions owz-string-command and checked-string-command inplement
-;   an additional ocp-wizard specific convention for encoding failure
-;   (exception OwzFailure) and unexpected errors. The former raises
-;   the lisp exception owz-failure and owz-error; the latter reports
-;   them in the minibuffer.
+;;   Functions owz-string-command and checked-string-command inplement
+;;   an additional ocp-wizard specific convention for encoding failure
+;;   (exception OwzFailure) and unexpected errors. The former raises
+;;   the lisp exception owz-failure and owz-error; the latter reports
+;;   them in the minibuffer.
 
-; - Callbacks are just lisp forms that are simply evaluated. Therefore,
-;   implementing the request processing just amounts to binding all
-;   symbols which may appear in the received forms. Failure is encoded
-;   by the two special messages "CALLBACK_READ_ERROR\n" and
-;   "ERROR_IN_CALLBACK\n<error contents as a form>\n".
+;; - Callbacks are just lisp forms that are simply evaluated. Therefore,
+;;   implementing the request processing just amounts to binding all
+;;   symbols which may appear in the received forms. Failure is encoded
+;;   by the two special messages "CALLBACK_READ_ERROR\n" and
+;;   "ERROR_IN_CALLBACK\n<error contents as a form>\n".
 
 (defconst callback-read-error "CALLBACK_READ_ERROR"
   "represents an error when reading a callback")
@@ -4942,7 +5020,7 @@ modifications are tracked explicitely thanks to update-modified."
 (put 'owz-error 'error-message "OCP Wizard unexpected error")
 
 (defun owz-string-command (c)
-  (let ((res (string-command c)))
+  (let ((res (ocp-rpc-string-command c)))
     (if (and
          (>= (length res) 6)
          (string= (substring res 0 6) "Error\n"))
@@ -4963,7 +5041,8 @@ modifications are tracked explicitely thanks to update-modified."
      (progn (message "%s" (cadr cond)) nil))
     ))
 
-(defun process-callback (connection-buffer)
+;; Provides the callback handler required by OCP RPC
+(defun ocp-rpc-process-callback (connection-buffer)
   (condition-case nil
       (let ((callback (read connection-buffer)))
         ;;(message "received command %s" callback)
@@ -4982,23 +5061,31 @@ modifications are tracked explicitely thanks to update-modified."
     (error callback-read-error))
   )
 
-(defvar server-port 0
+(defvar typerex-server-port 0
   "port number for the ocp-wizard server")
 
 (defcustom ocp-server-command "ocp-wizard"
   "command to run the TypeRex server ; may be any shell command"
-  :group 'ocp :type '(string))
+  :group 'typerex-misc :type '(string))
 
 (defcustom ocp-debug nil "whether TypeRex should run in debug mode"
-  :group 'ocp :type '(string))
+  :group 'typerex-misc :type '(string))
 
 (defcustom ocp-dont-catch-errors nil "fail-fast mode"
-  :group 'ocp :type '(boolean))
+  :group 'typerex-misc :type '(boolean))
 
 (defcustom ocp-profile nil "a command name to be profiled"
-  :group 'ocp :type '(string))
+  :group 'typerex-misc :type '(string))
 
 (defvar ocp-wizard-server-process nil "the ocp-wizard server process")
+
+(defvar typerex-server-version nil "version of ocp-wizard server")
+
+(defun ocp-config ()
+  (let ((config (read (checked-string-command  "version"))))
+    (setq typerex-server-version (cdr (assoc 'version config)))
+    (setq typerex-library-path (cdr(assoc 'ocamllib config)))
+    config))
 
 (defun ocp-restart-server ()
   "(Re-)Start the TypeRex server, killing any existing one"
@@ -5010,35 +5097,44 @@ modifications are tracked explicitely thanks to update-modified."
   (mapc
    (lambda (b) (with-current-buffer b (reset-tokenization)))
    (buffer-list))
-    (setq server-port (start-rpc-server))
-    (message "Listening on port %d" server-port)
+    (setq typerex-server-port (ocp-rpc-start-server))
+    (message "Listening on port %d" typerex-server-port)
     (message "Starting TypeRex server '%s'" ocp-server-command)
     (let ((line
            (concat
-; This output should be empty: logging is in ~/.ocp-wizard-log
+            (if typerex-library-path (concat"OCAMLLIB=" typerex-library-path " ") "")
             ocp-server-command
             (if (eq ocp-debug t) " -debug all"
               (if (eq ocp-debug nil) ""
                 (concat " -debug " ocp-debug)))
             (if ocp-dont-catch-errors " -dont-catch-errors" "")
             (if ocp-profile (concat " -profile " ocp-profile) "")
-            (if (eq ocp-theme nil) "" (concat " -coloring-theme " ocp-theme))
+            (if (or (eq ocp-theme nil) (member ocp-theme '("tuareg" "caml")))
+                ""
+              (concat " -coloring-theme " ocp-theme))
             " -backtrace"
-            " emacs-server " (int-to-string server-port))))
+            " emacs-server " (int-to-string typerex-server-port))))
       (message "Running: %s" line)
       (setq ocp-wizard-server-process
             (start-process-shell-command
+             ;; The output should be empty: logging is in ~/.ocp-wizard-log
              "typerex-server" "*typerex-server-stdout-stderr*" line)))
     (set-process-query-on-exit-flag ocp-wizard-server-process nil)
     (message "Waiting for TypeRex server to connect")
     (let ((waited-time 0))
-      (while (and (< waited-time 1.5) (eq connection nil))
+      (while (and (< waited-time 1.5) (eq ocp-rpc-connection nil))
         (sleep-for 0.01)
         (setq waited-time (+ waited-time 0.01)))
-;    (start-connection server-port)
-      (if (eq connection nil)
+      (if (eq ocp-rpc-connection nil)
           (message "Timeout while waiting for TypeRex server!!!")
-        (message "Connection established with TypeRex server"))))
+        (message "Connection established with TypeRex server")
+        (message "Checking version")
+        (ocp-config)
+        (if (string= typerex-version typerex-server-version)
+            (message "TypeRex-%s started" typerex-version)
+          (message "Warning! TypeRex server version mismatch: %s <> %s"
+                   typerex-server-version typerex-version))
+        )))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;                                                                        ;
 ;                        TypeRex OCaml Studio                            ;
@@ -5056,85 +5152,87 @@ modifications are tracked explicitely thanks to update-modified."
 ;                                                                        ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Auto-completion using Auto Complete Mode
+;; Auto-completion using Auto Complete Mode
 
-; This file defines a completion source for the auto complete mode,
-; which rellies on ocp-wizard tokenization and semantic analysis.
+;; This file defines a completion source for the auto complete mode,
+;; which rellies on ocp-wizard tokenization and semantic analysis.
 
 (defcustom auto-complete-keys nil
   "If set, simultaneously specifies a set of keys for auto-completion"
-  :group 'ocp :type '(symbol))
+  :group 'typerex-auto-complete :type '(symbol))
 
-(require 'auto-complete-config nil t)
+;;(eval-when-compile
+  (require 'auto-complete-config nil t)
+;;)
 
-(defvar last-completion-point nil
+(defvar last-ocp-completion-point nil
   "the point at which completion data is available, if any")
-(make-variable-buffer-local 'last-completion-point)
-(defvar last-completion-data nil
+(make-variable-buffer-local 'last-ocp-completion-point)
+(defvar last-ocp-completion-data nil
   "the data for the last completion point, if any")
-(make-variable-buffer-local 'last-completion-data)
+(make-variable-buffer-local 'last-ocp-completion-data)
 
-(defun discard-completion-data ()
+(defun discard-ocp-completion-data ()
   "Flush the completion data. This function is called by the
 modification hook in tokenize.el."
-  (setq last-completion-point nil)
-  (setq last-completion-data nil))
+  (setq last-ocp-completion-point nil)
+  (setq last-ocp-completion-data nil))
 
-(defun compute-completion-data ()
-;  (message "computing candidates...")
+(defun compute-ocp-completion-data ()
+;;  (message "computing candidates...")
   (let*
       ((pos (- (position-bytes (point)) 1))
         (result
         (owz-string-command
          (concat
           "completion " (buffer-name) " " (int-to-string pos)))))
-;    (message "candidates: %s" result)
+;;    (message "candidates: %s" result)
     (let
         ((candidates (read result)))
-;      (mapc
-;       (lambda (c) (message "candidate: %s" c))
-;       candidates)
+;;      (mapc
+;;       (lambda (c) (message "candidate: %s" c))
+;;       candidates)
       candidates))
   )
 
-(defun get-completion-data ()
-  (modify-changed-region)
-  (if (eq last-completion-point (point))
-      last-completion-data
-    (setq last-completion-point (point))
-    (setq last-completion-data (compute-completion-data))
-    last-completion-data))
+(defun get-ocp-completion-data ()
+  (ocp-modify-changed-region)
+  (if (eq last-ocp-completion-point (point))
+      last-ocp-completion-data
+    (setq last-ocp-completion-point (point))
+    (setq last-ocp-completion-data (compute-ocp-completion-data))
+    last-ocp-completion-data))
 
-(defun ocp-prefix () (eval (car (get-completion-data))))
-(defun ocp-candidates () (cadr (get-completion-data)))
+(defun ocp-prefix () (eval (car (get-ocp-completion-data))))
+(defun ocp-candidates () (cadr (get-ocp-completion-data)))
 
 (defun ocp-candidates-names ()
   (let ((candidates (ocp-candidates)))
-;    (message "candidates: %s" candidates)
+;;    (message "candidates: %s" candidates)
     (let ((candidates (mapcar 'car candidates)))
-;      (message "candidates: %s" candidates)
+;;      (message "candidates: %s" candidates)
       candidates)))
 
-;(defun ocp-ac-documentation (candidate)
-;  (message "getting doc for %s" candidate)
-;  (let ((doc (cadr (assoc candidate (ocp-candidates)))))
-;    (message "doc=%s" doc)
-;    doc))
+;;(defun ocp-ac-documentation (candidate)
+;;  (message "getting doc for %s" candidate)
+;;  (let ((doc (cadr (assoc candidate (ocp-candidates)))))
+;;    (message "doc=%s" doc)
+;;    doc))
 
 (defun ocp-ac-documentation (candidate)
-;  (message "getting doc for %s" candidate)
+;;  (message "getting doc for %s" candidate)
   (let ((doc
          (owz-string-command
           (concat "completion-doc " (buffer-name) " " candidate))))
-;    (message "doc=%s" doc)
+;;    (message "doc=%s" doc)
     doc))
 
 ;; This is not how symbol works
-;(defun ocp-ac-symbol (candidate)
-;  (message "getting symbol for %s" candidate)
-;  (let ((symb (cadr (assoc candidate (ocp-candidates)))))
-;    (message "symb=%s" symb)
-;    symb))
+;;(defun ocp-ac-symbol (candidate)
+;;  (message "getting symbol for %s" candidate)
+;;  (let ((symb (cadr (assoc candidate (ocp-candidates)))))
+;;    (message "symb=%s" symb)
+;;    symb))
 
 (defun ac-keys-backquote-backslash ()
   "configuration using backquote to complete longest common
@@ -5169,7 +5267,7 @@ modification hook in tokenize.el."
      (define-key ac-mode-map "²" 'auto-complete)
      (define-key (current-global-map) "²" nil)
      (define-key ac-completing-map "$" 'ac-complete)
-     ;;AutoComplete keymap: keeping normal behavior of RET and TAB, up and down
+     ;; AutoComplete keymap: keeping normal behavior of RET and TAB, up and down
      (define-key ac-completing-map "\C-n" 'ac-next)
      (define-key ac-completing-map "\C-p" 'ac-previous)
      (define-key ac-completing-map "\r" nil)
@@ -5190,7 +5288,7 @@ as trigger key"
       (ac-define-source ocp-wizard
         '((candidates . ocp-candidates-names)
           (prefix . ocp-prefix)
-;          (symbol . ocp-ac-symbol)
+;;          (symbol . ocp-ac-symbol)
           (document . ocp-ac-documentation)
           ))
       ;; Set auto-completion source to ocp-wizard when in TypeRex mode
@@ -5233,17 +5331,54 @@ as trigger key"
 
 (defcustom ocp-menu-trigger nil
   "mouse event to trigger the contextual menu (default nil)"
-  :group 'ocp)
+  :group 'typerex-misc)
+
+(defcustom ocp-prefix-key [(control o)]
+  "key combination to trigger the command menu (default nil)"
+  :group 'typerex-misc)
+
+(defun ocp-wrap-grep (grep)
+  "Show all definitions and references for the current ident"
+  (interactive)
+  (let ((res (checked-string-command grep)))
+    (when res
+      (let* ((res (read res))
+             (root (car res))
+             (contents (cadr res))
+             (overlays (eval (cadr (cdr res))))
+             (local-overlays (eval (cadr (cdr (cdr res)))))
+             (buffer (buffer-name))
+             (grep-buffer "*ocp-wizard-grep*"))
+        (set-cleared-buffer grep-buffer)
+        (compilation-minor-mode 1)
+        (cd root)
+        (insert contents)
+        (display-buffer grep-buffer)
+        (highlight-regions t overlays)
+        (set-buffer buffer)
+        (highlight-regions nil local-overlays)
+        ))))
+
+(defun ocp-grep ()
+  "Show all definitions and references for the current ident"
+  (interactive)
+  (ocp-wrap-grep "grep"))
+
+(defun ocp-grep-toplevel ()
+  "Grep the toplevel module defined by the current source file"
+  (interactive)
+  (ocp-wrap-grep "grep-toplevel"))
 
 (defun ocp-wizard-menu-plugin ()
   "Register the commands as a keyboard menu"
+
   (defvar ocp-prefix (make-sparse-keymap "OCP"))
-;  (define-prefix-command 'ocp-prefix nil "OCP")
-  (define-key typerex-mode-map [(control o)] ocp-prefix)
+  (defvar ocp-prefix-mouse (make-sparse-keymap "OCP"))
+  (define-key typerex-mode-map ocp-prefix-key ocp-prefix)
+  (when ocp-menu-trigger
+    (define-key typerex-mode-map ocp-menu-trigger ocp-prefix-mouse))
 
   (defvar ocp-prefix-top (make-sparse-keymap "Toplevel"))
-;  (define-prefix-command 'ocp-prefix-top nil "Toplevel")
-;  (define-key typerex-mode-map [(t)] 'ocp-prefix-top)
   (define-key ocp-prefix-top [(r)] '("Rename" . ocp-rename-toplevel))
   (define-key ocp-prefix-top [(g)] '("Grep" . ocp-grep-toplevel))
 
@@ -5257,34 +5392,19 @@ as trigger key"
   (define-key ocp-prefix [(d)] '("Definition" . ocp-goto-definition))
   (define-key ocp-prefix [(c)] '("Comment" . ocp-comment-definition))
 
-;;   (defvar typerex-mode-menu)
-;; ;; keys are irrelevant, but should be all different !
-;;   (define-key typerex-mode-menu [(separator)] '(menu-item "---"))
-;;   (mapc
-;;    (lambda (c)
-;;      (define-key typerex-mode-menu (cadr (cdr c))
-;;     `(menu-item ,(cadr c) ,(car c) ,:help ,(documentation (car c)))))
-;;    '(
-;;      (ocp-restart-server "Restart" "s")
-;;      (ocp-undo "Undo (global)" "u")
-;;      (ocp-eliminate-open "Qualify" "q")
-;;      (ocp-prune-lids "Prune" "p")
-;;      (ocp-rename "Rename" "r")
-;;      (ocp-grep "Grep" "g")
-;;      (ocp-cycle-definitions "Alternate definitions" "a")
-;;      (ocp-goto-definition "Definition" "d")
-;;      (ocp-comment-definition "Comment" "c")
-;;      (ocp-rename-toplevel "Toplevel Rename" [(tr)])
-;;      (ocp-grep-toplevel "Toplevel Grep" [(tg)])
-;;      ))
-  (when ocp-menu-trigger
-;    (add-hook
-;     'typerex-mode-hook
-;     (lambda ()
-    (define-key (current-local-map) ocp-menu-trigger ocp-prefix))
+  (define-key ocp-prefix-mouse [(u)] `("Undo (global)" . ocp-undo))
+  (define-key ocp-prefix-mouse [(q)] '("Qualify" . ocp-eliminate-open))
+  (define-key ocp-prefix-mouse [(p)] '("Prune" . ocp-prune-lids))
+  (define-key ocp-prefix-mouse [(x)] '("Toplevel Rename" . ocp-rename-toplevel))
+  (define-key ocp-prefix-mouse [(y)] '("Toplevel Grep" . ocp-grep-toplevel))
+  (define-key ocp-prefix-mouse [(r)] '("Rename" . ocp-rename))
+  (define-key ocp-prefix-mouse [(g)] '("Grep" . ocp-grep))
+  (define-key ocp-prefix-mouse [(a)] '("Alternate definitions" . ocp-cycle-definitions))
+  (define-key ocp-prefix-mouse [(d)] '("Definition" . ocp-goto-definition))
+  (define-key ocp-prefix-mouse [(c)] '("Comment" . ocp-comment-definition))
   )
 
-(defun action-item (c)
+(defun ocp-action-item (c)
   `[,(cadr c) ,(car c) ,:help ,(documentation (car c))])
 
 (defun typerex-build-menu ()
@@ -5294,7 +5414,7 @@ as trigger key"
    (append
    '("TypeRex")
    (mapcar
-    'action-item
+    'ocp-action-item
     '(
       (ocp-grep-toplevel "Toplevel Grep")
       (ocp-rename-toplevel "Toplevel Rename")
@@ -5318,6 +5438,9 @@ as trigger key"
      ["Switch .ml/.mli" typerex-find-alternate-file t]
    "---"
      ["Compile..." compile t]
+     ["On-the-fly compilation" flymake-mode :style toggle :selected flymake-mode
+      :help "Turn on/off on-the-fly compilation with ocamlbuild"
+      :visible ocp-flymake-available]
 
      ("Interactive Mode"
       ["Run Caml Toplevel" typerex-run-caml t]
@@ -5353,12 +5476,13 @@ as trigger key"
        typerex-with-caml-mode-p]
      "---"
      ("More"
-     ,(action-item '(ocp-restart-server "Restart"))
+     ,(ocp-action-item '(ocp-restart-server "Restart"))
      ["Customize TypeRex Mode..." (customize-group 'ocp) t]
      ("TypeRex Options" ["Dummy" nil t])
      ("TypeRex Interactive Options" ["Dummy" nil t])
-     ["Short Cuts" typerex-short-cuts]
-     ["TypeRex Mode Help" typerex-help t]
+     ["TypeRex User Manual" typerex-browse-typerex-manual t]
+     ["TypeRex Short Cuts" typerex-help t]
+;;     ["Short Cuts" typerex-short-cuts]
      ["OCaml Reference Manual..." typerex-browse-manual t]
      ["OCaml Library..." typerex-browse-library t]
      ["About" typerex-about t])
@@ -5379,8 +5503,4 @@ as trigger key"
                   "Definitions" typerex-definitions-menu)))
       (setq typerex-definitions-menu-last-buffer nil))))
 
-
-; This overwrites the bindings of ocp-wizard-plugin, so this file
-; should be evaluated after hooks are evaluated
-;(ocp-wizard-menu-plugin)
-(add-hook 'typerex-mode-hook 'ocp-wizard-menu-plugin)
+(ocp-wizard-menu-plugin)
