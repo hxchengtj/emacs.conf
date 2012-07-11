@@ -500,10 +500,16 @@ table determines which characters these are."
 ;; Uncomment to enable typerex command menu by right click
 ;;(setq ocp-menu-trigger [mouse-3])
 
-;; Uncomment make new syntax coloring look almost like Tuareg
-;;(setq ocp-theme "tuareg_like")
 ;; Uncomment to disable new syntax coloring and use Tuareg
 ;;(setq ocp-syntax-coloring nil)
+
+;; It can be one of (check http://www.typerex.org/manual-setup.html):
+;; - "syntactic" (default): the new TypeRex coloring, providing extended identifier kind distinction, and smarter comment/string handling
+;; - "tuareg_like": The same TypeRex implementation, tuned to look almost like Tuareg mode (with minor improvements and differences, and with Tuareg faces renamed into typerex-font-lock-...)
+;; - "caml_like": Same as tuareg_like, with Caml-mode colors (not renamed)
+;; - "tuareg" The embedded Tuareg-mode implementation of syntax coloring (again with renamed Tuareg faces).
+;; - "caml" The Caml-mode implementation of syntax coloring, which must be installed and present in the path (file caml-font.el). You may need to add the following to your .emacs: 
+(setq ocp-theme "caml_like")
 
 ;;;; Auto completion (experimental)
 ;;;; Don't use M-x invert-face default with auto-complete! (emacs -r is OK)
