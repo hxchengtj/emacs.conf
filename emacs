@@ -73,13 +73,11 @@
 (define-key dired-sort-map "n" (lambda () "sort by Name" (interactive) (dired-sort-other dired-listing-switches)))
 (define-key dired-sort-map "d" (lambda () "sort by name grouping Dirs" (interactive) (dired-sort-other (concat dired-listing-switches " --group-directories-first"))))
 
-(defun dired-do-shell-launch-file-default ()
-  (interactive)
-  (save-window-excursion
-    (dired-do-async-shell-command
-     "$HOME/.emacs.d/open.sh" current-prefix-arg ;; linux;; multiple files
-     (dired-get-marked-files t current-prefix-arg))))
-(define-key dired-mode-map (kbd "s o") 'dired-do-shell-launch-file-default)
+(defun dired-open (&optional file-list)
+  (interactive
+   (list (dired-get-marked-files t current-prefix-arg)))
+  (apply 'call-process "xdg-open" nil 0 nil file-list))
+(define-key dired-mode-map (kbd "s o") 'dired-open)
 
 ;; recentf
 (require 'recentf)
