@@ -21,6 +21,9 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq confirm-nonexistent-file-or-buffer nil)
 
+(define-key function-key-map [C-kp-home] [?\M-<])
+(define-key function-key-map [C-kp-end] [?\M->])
+
 ;; don't ask if I really want to kill a buffer with attached running process
 (setq kill-buffer-query-functions
       (remq 'process-kill-buffer-query-function
