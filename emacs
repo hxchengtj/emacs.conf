@@ -38,6 +38,7 @@
     (progn
       (load "~/.emacs.d/color-theme-almost-monokai.el")
       (color-theme-almost-monokai)
+      (set-face-foreground 'mode-line "gray15")
       (setq ansi-color-names-vector ["#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"])
       (setq ansi-term-color-vector [unspecified "#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"]))
   (progn
