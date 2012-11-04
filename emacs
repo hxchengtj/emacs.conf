@@ -520,4 +520,4 @@ table determines which characters these are."
 ;;;; I want immediate menu pop-up
 (setq ac-auto-show-menu 0.)
 ;;;; Short delay before showing help
-(setq ac-quick-help-delay 0.3)
+;; (setq ac-quick-help-delay 0.3)
