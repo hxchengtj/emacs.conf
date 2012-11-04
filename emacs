@@ -6,8 +6,8 @@
 (if window-system
     (if (<= (x-display-pixel-height) 800)
 	;; (add-to-list 'default-frame-alist '(font . "Terminus-12")) ;; small screen!
-	(add-to-list 'default-frame-alist '(font . "Inconsolata-14")) ;; small screen!
-      (add-to-list 'default-frame-alist '(font . "Inconsolata-14"))))
+	(add-to-list 'default-frame-alist '(font . "Monospace-14")) ;; small screen!
+      (add-to-list 'default-frame-alist '(font . "Monospace-14"))))
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 (column-number-mode t)
 (setq-default fill-column 80)
@@ -20,6 +20,9 @@
 (setq vc-handled-backends nil)
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq confirm-nonexistent-file-or-buffer nil)
+
+(define-key function-key-map [C-kp-home] [?\M-<])
+(define-key function-key-map [C-kp-end] [?\M->])
 
 ;; don't ask if I really want to kill a buffer with attached running process
 (setq kill-buffer-query-functions
@@ -70,13 +73,11 @@
 (define-key dired-sort-map "n" (lambda () "sort by Name" (interactive) (dired-sort-other dired-listing-switches)))
 (define-key dired-sort-map "d" (lambda () "sort by name grouping Dirs" (interactive) (dired-sort-other (concat dired-listing-switches " --group-directories-first"))))
 
-(defun dired-do-shell-launch-file-default ()
-  (interactive)
-  (save-window-excursion
-    (dired-do-async-shell-command
-     "$HOME/.emacs.d/open.sh" current-prefix-arg ;; linux;; multiple files
-     (dired-get-marked-files t current-prefix-arg))))
-(define-key dired-mode-map (kbd "s o") 'dired-do-shell-launch-file-default)
+(defun dired-open (&optional file-list)
+  (interactive
+   (list (dired-get-marked-files t current-prefix-arg)))
+  (apply 'call-process "xdg-open" nil 0 nil file-list))
+(define-key dired-mode-map (kbd "s o") 'dired-open)
 
 ;; recentf
 (require 'recentf)
@@ -499,10 +500,16 @@ table determines which characters these are."
 ;; Uncomment to enable typerex command menu by right click
 ;;(setq ocp-menu-trigger [mouse-3])
 
-;; Uncomment make new syntax coloring look almost like Tuareg
-;;(setq ocp-theme "tuareg_like")
 ;; Uncomment to disable new syntax coloring and use Tuareg
 ;;(setq ocp-syntax-coloring nil)
+
+;; It can be one of (check http://www.typerex.org/manual-setup.html):
+;; - "syntactic" (default): the new TypeRex coloring, providing extended identifier kind distinction, and smarter comment/string handling
+;; - "tuareg_like": The same TypeRex implementation, tuned to look almost like Tuareg mode (with minor improvements and differences, and with Tuareg faces renamed into typerex-font-lock-...)
+;; - "caml_like": Same as tuareg_like, with Caml-mode colors (not renamed)
+;; - "tuareg" The embedded Tuareg-mode implementation of syntax coloring (again with renamed Tuareg faces).
+;; - "caml" The Caml-mode implementation of syntax coloring, which must be installed and present in the path (file caml-font.el). You may need to add the following to your .emacs: 
+(setq ocp-theme "caml_like")
 
 ;;;; Auto completion (experimental)
 ;;;; Don't use M-x invert-face default with auto-complete! (emacs -r is OK)
