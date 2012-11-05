@@ -38,7 +38,6 @@
     (progn
       (load "~/.emacs.d/color-theme-almost-monokai.el")
       (color-theme-almost-monokai)
-      (set-face-foreground 'mode-line "gray15")
       (setq ansi-color-names-vector ["#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"])
       (setq ansi-term-color-vector [unspecified "#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"]))
   (progn
@@ -320,19 +319,52 @@ table determines which characters these are."
     (setq MARGIN 20)
   (setq MARGIN 40))
 
+(defun big-margin-on ()
+  (interactive)
+  (setq left-margin-width MARGIN)
+  (setq right-margin-width MARGIN)
+  (set-window-margins (selected-window)
+		      left-margin-width
+		      right-margin-width))
+
+(defun big-margin-off ()
+  (interactive)
+  (setq left-margin-width 0)
+  (setq right-margin-width 0)
+  (set-window-margins (selected-window)
+		      left-margin-width
+		      right-margin-width))
+
 (defun big-margin-toggle ()
   (interactive)
   (cond
    ((= left-margin-width 0)
-    (setq left-margin-width MARGIN)
-    (setq right-margin-width MARGIN))
+    (big-margin-on))
    (t
-    (setq left-margin-width 0)
-    (setq right-margin-width 0)))
-  (set-window-margins (selected-window)
-		      left-margin-width
-		      right-margin-width))
-(global-set-key (kbd "<f9>") (lambda () (interactive) (big-margin-toggle)))
+    (big-margin-off))))
+
+(setq DARKROOM nil)
+(setq NORMAL-MODELINE-FG (face-attribute 'mode-line :foreground))
+
+(defun darkroom-on ()
+  (interactive)
+  (big-margin-on)
+  (set-face-foreground 'mode-line "gray15")
+  (setq DARKROOM t))
+
+(defun darkroom-off ()
+  (interactive)
+  (big-margin-off)
+  (set-face-foreground 'mode-line NORMAL-MODELINE-FG)
+  (setq DARKROOM nil))
+
+(defun darkroom-toggle ()
+  (interactive)
+  (if DARKROOM
+      (darkroom-off)
+    (darkroom-on)))
+
+(global-set-key (kbd "<f9>") (lambda () (interactive) (darkroom-toggle))
 
 ;;
 ;; git
