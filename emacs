@@ -513,16 +513,30 @@ table determines which characters these are."
 ;; (autoload 'tuareg-mode "tuareg" "Major mode for editing Caml code" t)
 ;; (autoload 'camldebug "camldebug" "Run the Caml debugger" t)
 
-;; Loading TypeRex mode for OCaml files
-(add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . typerex-mode))
-(add-to-list 'interpreter-mode-alist '("ocamlrun" . typerex-mode))
-(add-to-list 'interpreter-mode-alist '("ocaml" . typerex-mode))
-(autoload 'typerex-mode "typerex" "Major mode for editing Caml code" t)
+(add-to-list 'load-path "~/.emacs.d/auto-complete-mode")
 
-;; TypeRex mode configuration
-(setq ocp-server-command "~/local/bin/ocp-wizard")
-(setq typerex-in-indent 0)
-(setq-default indent-tabs-mode nil)
+(setq ocp-server-command (executable-find "ocp-wizard"))
+(when ocp-server-command ;; typerex correctly installed
+  ;; Loading TypeRex mode for OCaml files
+  (add-to-list 'auto-mode-alist '("\\.ml[iylp]?" . typerex-mode))
+  (add-to-list 'interpreter-mode-alist '("ocamlrun" . typerex-mode))
+  (add-to-list 'interpreter-mode-alist '("ocaml" . typerex-mode))
+  (autoload 'typerex-mode "typerex" "Major mode for editing Caml code" t)
+  ;; TypeRex mode configuration
+  (setq typerex-in-indent 0)
+  (setq-default indent-tabs-mode nil)
+  (setq ocp-theme "caml_like")
+  (setq ocp-auto-complete t) ;; experimental
+  (setq ac-auto-start 0)
+  ;; I want immediate menu pop-up
+  (setq ac-auto-show-menu 0.)
+  ;; Short delay before showing help
+  ;; (setq ac-quick-help-delay 0.3)
+;;;; Using <`> to complete whatever the context, and <C-`> for `
+;; (setq auto-complete-keys 'ac-keys-backquote-backslash)
+;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
+;;;; Note: this overrides individual auto-complete key settings
+  )
 
 ;;
 ;; a general purpose Makefile can be as follows:
@@ -556,35 +570,3 @@ table determines which characters these are."
 
 ;; %.native: %.ml
 ;; 	ocamlbuild -no-hygiene $@
-
-;; Uncomment to enable typerex command menu by right click
-;;(setq ocp-menu-trigger [mouse-3])
-
-;; Uncomment to disable new syntax coloring and use Tuareg
-;;(setq ocp-syntax-coloring nil)
-
-;; It can be one of (check http://www.typerex.org/manual-setup.html):
-;; - "syntactic" (default): the new TypeRex coloring, providing extended identifier kind distinction, and smarter comment/string handling
-;; - "tuareg_like": The same TypeRex implementation, tuned to look almost like Tuareg mode (with minor improvements and differences, and with Tuareg faces renamed into typerex-font-lock-...)
-;; - "caml_like": Same as tuareg_like, with Caml-mode colors (not renamed)
-;; - "tuareg" The embedded Tuareg-mode implementation of syntax coloring (again with renamed Tuareg faces).
-;; - "caml" The Caml-mode implementation of syntax coloring, which must be installed and present in the path (file caml-font.el). You may need to add the following to your .emacs: 
-(setq ocp-theme "caml_like")
-
-;;;; Auto completion (experimental)
-;;;; Don't use M-x invert-face default with auto-complete! (emacs -r is OK)
-(add-to-list 'load-path "~/.emacs.d/auto-complete-mode")
-(setq ocp-auto-complete t)
-
-;;;; Using <`> to complete whatever the context, and <C-`> for `
-;; (setq auto-complete-keys 'ac-keys-backquote-backslash)
-;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
-;;;; Note: this overrides individual auto-complete key settings
-
-;;;; Number of characters required to start (nil to disable)
-(setq ac-auto-start 0)
-
-;;;; I want immediate menu pop-up
-(setq ac-auto-show-menu 0.)
-;;;; Short delay before showing help
-;; (setq ac-quick-help-delay 0.3)
