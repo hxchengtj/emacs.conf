@@ -368,8 +368,14 @@ table determines which characters these are."
 (require 'flymake)
 (setq flymake-gui-warnings-enabled nil)
 
+(setq
+ GCC-CMDLINE
+ (cond
+  ((executable-find "mpicc"))
+  ((executable-find "gcc"))))
+
 (defun flymake-get-gcc-cmdline (source base-dir)
-  (list "gcc"
+  (list GCC-CMDLINE
 	(append
 	 (list
 	  "-o" "nul"
