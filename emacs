@@ -315,12 +315,17 @@ table determines which characters these are."
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
+(if
+    (<= (x-display-pixel-height) 800) ;; small screen
+    (setq MARGIN 20)
+  (setq MARGIN 40))
+
 (defun big-margin-toggle ()
   (interactive)
   (cond
    ((= left-margin-width 0)
-    (setq left-margin-width 40)
-    (setq right-margin-width 40))
+    (setq left-margin-width MARGIN)
+    (setq right-margin-width MARGIN))
    (t
     (setq left-margin-width 0)
     (setq right-margin-width 0)))
