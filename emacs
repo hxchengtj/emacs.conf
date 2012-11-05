@@ -339,10 +339,26 @@ table determines which characters these are."
 ;; C++ and C mode...
 ;;
 (setq HOME (expand-file-name ""))
-(setq LOCAL-FLAGS (format "-I%s/local/include -I%s/local/src/MCMCBenchmarks/include" HOME HOME))
-(setq GSL-FLAGS (substring (shell-command-to-string "gsl-config --cflags") 0 -1))
-(setq R-FLAGS (substring (shell-command-to-string "R CMD config --cppflags") 0 -1))
-(setq CFLAGS (concat LOCAL-FLAGS " " GSL-FLAGS " " R-FLAGS))
+(setq LOCAL-FLAGS (getenv "CFLAGS"))
+(setq CFLAGS LOCAL-FLAGS)
+
+(setq GSL-CONFIG (executable-find "gsl-config"))
+(if GSL-CONFIG
+    (progn
+      (setq GSL-FLAGS (substring (shell-command-to-string (format "%s --cflags" GSL-CONFIG)) 0 -1))
+      (setq CFLAGS (concat CFLAGS " " GSL-FLAGS))))
+
+(setq R-CMD (executable-find "R"))
+(if R-CMD
+    (progn
+      (setq R-FLAGS (substring (shell-command-to-string (format "%s CMD config --cppflags" R-CMD)) 0 -1))
+      (setq CFLAGS (concat CFLAGS " " R-FLAGS))))
+
+(setq MPICC (executable-find "mpicc"))
+(if MPICC
+    (progn
+      (setq MPI-FLAGS (substring (shell-command-to-string (format "%s --showme:compile" MPICC)) 0 -1))
+      (concat CFLAGS  " " MPI-FLAGS)))
 
 ;; eldoc
 (setq c-eldoc-includes CFLAGS)
