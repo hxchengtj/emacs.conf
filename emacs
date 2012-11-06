@@ -34,15 +34,19 @@
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
-(if window-system
+(load "~/.emacs.d/color-theme-almost-monokai.el")
+(load "~/.emacs.d/zenburn.el")
+
+(defun colors-reset ()
+  (interactive)
+  (if window-system
+      (progn
+	(color-theme-almost-monokai)
+	(setq ansi-color-names-vector ["#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"])
+	(setq ansi-term-color-vector [unspecified "#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"]))
     (progn
-      (load "~/.emacs.d/color-theme-almost-monokai.el")
-      (color-theme-almost-monokai)
-      (setq ansi-color-names-vector ["#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"])
-      (setq ansi-term-color-vector [unspecified "#1A1A1A" "red" "#A6E22A" "CadetBlue" "#66D9EF" "#F1266F" "#DFD874" "#75715D"]))
-  (progn
-    (load "~/.emacs.d/zenburn.el")
-    (color-theme-zenburn)))
+      (color-theme-zenburn))))
+(colors-reset)
 
 (show-paren-mode 1)
 (setq show-paren-delay 0)
@@ -343,19 +347,24 @@ table determines which characters these are."
    (t
     (big-margin-off))))
 
+(global-set-key (kbd "<f9>") (lambda () (interactive) (big-margin-toggle)))
+
+(defun modeline-faint ()
+  (interactive)
+  (set-face-foreground 'mode-line "gray15"))
+
 (setq DARKROOM nil)
-(setq NORMAL-MODELINE-FG (face-attribute 'mode-line :foreground))
 
 (defun darkroom-on ()
   (interactive)
   (big-margin-on)
-  (set-face-foreground 'mode-line "gray15")
+  (modeline-faint)
   (setq DARKROOM t))
 
 (defun darkroom-off ()
   (interactive)
   (big-margin-off)
-  (set-face-foreground 'mode-line NORMAL-MODELINE-FG)
+  (colors-reset)
   (setq DARKROOM nil))
 
 (defun darkroom-toggle ()
@@ -364,7 +373,7 @@ table determines which characters these are."
       (darkroom-off)
     (darkroom-on)))
 
-(global-set-key (kbd "<f9>") (lambda () (interactive) (darkroom-toggle)))
+(global-set-key (kbd "<f8>") (lambda () (interactive) (darkroom-toggle)))
 
 ;;
 ;; git
