@@ -364,7 +364,7 @@ table determines which characters these are."
       (darkroom-off)
     (darkroom-on)))
 
-(global-set-key (kbd "<f9>") (lambda () (interactive) (darkroom-toggle))
+(global-set-key (kbd "<f9>") (lambda () (interactive) (darkroom-toggle)))
 
 ;;
 ;; git
