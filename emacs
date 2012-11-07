@@ -31,6 +31,8 @@
 
 (setq set-mark-command-repeat-pop t)
 
+(add-to-list 'load-path "~/.emacs.d")
+
 ;; scroll goes down by units of one rather than jumping by large amounts
 (setq scroll-conservatively 100000)
 
@@ -39,7 +41,6 @@
 (require 'smooth-scrolling)
 (setq smooth-scroll-margin 5)
 
-(add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
 (load "~/.emacs.d/color-theme-almost-monokai.el")
