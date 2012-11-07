@@ -208,6 +208,14 @@
 (setq preview-scale-function 1.5)
 
 ;;
+;; writing
+;;
+(when (file-exists-p "~/.emacs.d/thesaurus.api-key.el")
+  (require 'thesaurus)
+  (load "~/.emacs.d/thesaurus.api-key.el")
+  (define-key global-map (kbd "C-x t") 'thesaurus-choose-synonym-and-replace))
+
+;;
 ;; org mode
 ;;
 (add-to-list 'load-path "~/.emacs.d/org/lisp")

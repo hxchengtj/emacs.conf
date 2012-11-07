@@ -4,3 +4,5 @@ auto-save-list
 *.elc
 typerex-1.0.1
 ac-comphist.dat
+.thesaurus.cache
+thesaurus.api-key.el
