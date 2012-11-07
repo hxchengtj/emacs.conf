@@ -31,6 +31,14 @@
 
 (setq set-mark-command-repeat-pop t)
 
+;; scroll goes down by units of one rather than jumping by large amounts
+(setq scroll-conservatively 100000)
+
+;; requires the smooth-scrolling package
+;; ensures that there is always 5 lines of context above and below the cursor
+(require 'smooth-scrolling)
+(setq smooth-scroll-margin 5)
+
 (add-to-list 'load-path "~/.emacs.d")
 (add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
