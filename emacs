@@ -208,6 +208,14 @@
 (setq preview-default-document-pt 12)
 (setq preview-scale-function 1.5)
 
+(setq texcount-bin (executable-find "texcount"))
+(defun latex-word-count ()
+  (interactive)
+  (shell-command (concat texcount-bin
+			 " "
+                         ; "uncomment then options go here "
+                         (buffer-file-name))))
+
 ;;
 ;; writing
 ;;
