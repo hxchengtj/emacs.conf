@@ -224,6 +224,9 @@
   (load "~/.emacs.d/thesaurus.api-key.el")
   (define-key global-map (kbd "C-x t") 'thesaurus-choose-synonym-and-replace))
 
+;; markdown
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+
 ;;
 ;; org mode
 ;;
