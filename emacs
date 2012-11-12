@@ -77,6 +77,16 @@
 (setq dired-listing-switches "-alh")
 (setq dired-omit-files "^\\...+$")
 (add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1)))
+(setq dired-dwim-target t) ;; easier copying between folders
+(add-hook 'dired-mode-hook ;; use same buffer while navigating
+          (lambda ()
+            (define-key dired-mode-map (kbd "<return>")
+              'dired-find-alternate-file) ; was dired-advertised-find-file
+            (define-key dired-mode-map (kbd "^")
+              (lambda () (interactive) (find-alternate-file "..")))
+                                        ; was dired-up-directory
+            ))
+(put 'dired-find-alternate-file 'disabled nil)
 
 (defvar dired-sort-map (make-sparse-keymap))
 (define-key dired-mode-map "s" dired-sort-map)
