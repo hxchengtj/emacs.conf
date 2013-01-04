@@ -267,29 +267,6 @@
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
-;; send emails
-(setq send-mail-function 'smtpmail-send-it
-      message-send-mail-function 'smtpmail-send-it
-      smtpmail-starttls-credentials
-      '(("smtp.gmail.com" 587 nil nil))
-      smtpmail-auth-credentials
-      (expand-file-name "~/.authinfo")
-      smtpmail-default-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-smtp-service 587
-      smtpmail-debug-info t
-      starttls-extra-arguments nil
-      smtpmail-warn-about-unknown-extensions t
-      starttls-use-gnutls nil)
-(setq smtpmail-debug-verb t)
-(require 'smtpmail)
-(setq user-mail-address "antonio.fabio@gmail.com")
-(setq user-full-name "Antonio, Fabio Di Narzo")
-
-;; bbdb
-(add-to-list 'load-path "~/.emacs.d/bbdb")
-(require 'bbdb)
-
 ;; notmuch
 (add-to-list 'load-path "~/.emacs.d/notmuch")
 (setq notmuch-search-authors-width 40)
