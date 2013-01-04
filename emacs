@@ -571,7 +571,8 @@ table determines which characters these are."
   ;; Short delay before showing help
   ;; (setq ac-quick-help-delay 0.3)
 ;;;; Using <`> to complete whatever the context, and <C-`> for `
-;; (setq auto-complete-keys 'ac-keys-backquote-backslash)
+  ;; (setq auto-complete-keys 'ac-keys-backquote-backslash)
+  (setq auto-complete-keys 'ac-keys-default-start-with-c-tab)
 ;;;; Options: nil (default), 'ac-keys-default-start-with-c-tab, 'ac-keys-two-dollar
 ;;;; Note: this overrides individual auto-complete key settings
   )
