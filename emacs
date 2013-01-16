@@ -21,6 +21,8 @@
 (fset 'yes-or-no-p 'y-or-n-p)
 (setq confirm-nonexistent-file-or-buffer nil)
 
+(windmove-default-keybindings)
+
 (define-key function-key-map [C-kp-home] [?\M-<])
 (define-key function-key-map [C-kp-end] [?\M->])
 
@@ -235,6 +237,7 @@
 (add-to-list 'load-path "~/.emacs.d/org/contrib/lisp")
 (require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(setq org-replace-disputed-keys t)
 (setq org-agenda-files (list "~/GTD/gtd.org" "~/GTD/journal.org"))
 (setq org-cycle-include-plain-lists t)
 (setq org-use-fast-todo-selection t)
