@@ -664,3 +664,6 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
 
   (setq gnus-dired-mail-mode 'mu4e-user-agent)
   (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode))
+
+(setq user-mail-address "antonio.dinarzo@mssm.edu")
+(setq user-full-name "Antonio, Fabio Di Narzo")
