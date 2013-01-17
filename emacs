@@ -595,3 +595,72 @@ table determines which characters these are."
 
 ;; %.native: %.ml
 ;; 	ocamlbuild -no-hygiene $@
+
+;;
+;; desktop notifications
+;;
+(defun djcb-popup (title msg &optional icon sound)
+  "Show a popup if we're on X, or echo it otherwise; TITLE is the title
+of the message, MSG is the context. Optionally, you can provide an ICON"
+
+  (interactive)
+  (if (eq window-system 'x)
+      (shell-command (concat "notify-send "
+                             (if icon (concat "-i " icon) "")
+                             " '" title "' '" msg "'"))
+    ;; text only version
+    (message (concat title ": " msg))))
+
+;;
+;; E-MAIL
+;;
+(when
+    (require 'mu4e nil 'noerror)
+  (require 'org-mu4e)
+
+  (setq
+   mu4e-maildir "~/Maildir"
+   mu4e-sent-folder   "/Sent"
+   mu4e-drafts-folder "/Drafts"
+   mu4e-trash-folder  "/Trash"
+   mu4e-refile-folder "/Archives.2013")
+
+  (setq
+   mu4e-get-mail-command "offlineimap"
+   mu4e-update-interval 300) ;; update every 5 minutes
+
+ ;;; message view action
+  (defun mu4e-msgv-action-view-in-browser (msg)
+    "View the body of the message in a web browser."
+    (interactive)
+    (let ((html (mu4e-msg-field (mu4e-message-at-point t) :body-html))
+          (tmpfile (format "%s/%d.html" temporary-file-directory (random))))
+      (unless html (error "No html part for this message"))
+      (with-temp-file tmpfile
+        (insert
+         "<html>"
+         "<head><meta http-equiv=\"content-type\""
+         "content=\"text/html;charset=UTF-8\">"
+         html))
+      (browse-url (concat "file://" tmpfile))))
+  (add-to-list 'mu4e-view-actions
+               '("View in browser" . mu4e-msgv-action-view-in-browser) t)
+  (add-to-list 'mu4e-headers-actions
+               '("View in browser" . mu4e-msgv-action-view-in-browser) t)
+
+  (require 'gnus-dired)
+  ;; make the `gnus-dired-mail-buffers' function also work on
+  ;; message-mode derived modes, such as mu4e-compose-mode
+  (defun gnus-dired-mail-buffers ()
+    "Return a list of active message buffers."
+    (let (buffers)
+      (save-current-buffer
+        (dolist (buffer (buffer-list t))
+          (set-buffer buffer)
+          (when (and (derived-mode-p 'message-mode)
+                     (null message-sent-message-via))
+            (push (buffer-name buffer) buffers))))
+      (nreverse buffers)))
+
+  (setq gnus-dired-mail-mode 'mu4e-user-agent)
+  (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode))
