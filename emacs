@@ -178,6 +178,8 @@
 (custom-set-faces
  '(tooltip ((t (:background "#1A1A1A" :foreground "#F8F8F2" :foundry "fixed")))))
 
+(add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
 ;; AUCTEX
 (add-to-list 'load-path "/usr/share/emacs23/site-lisp")
 (load "auctex.el" nil t t)
