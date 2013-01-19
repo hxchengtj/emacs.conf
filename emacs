@@ -625,6 +625,8 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
    mu4e-trash-folder  "/Trash"
    mu4e-refile-folder "/Archives.2013")
 
+  (setq mu4e-html2text-command "html2text")
+
   (setq
    mu4e-get-mail-command "offlineimap"
    mu4e-update-interval 300) ;; update every 5 minutes
