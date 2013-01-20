@@ -170,7 +170,7 @@
 (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
 
 ;; ESS
-(setq user-full-name "Antonio, Fabio Di Narzo")
+(setq user-full-name "\"Antonio, Fabio Di Narzo\"")
 (add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
@@ -672,4 +672,32 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
   (add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode))
 
 (setq user-mail-address "antonio.dinarzo@mssm.edu")
-(setq user-full-name "Antonio, Fabio Di Narzo")
+
+;;
+;; sending mail
+;;
+(setq message-send-mail-function 'message-send-mail-with-sendmail
+      sendmail-program "/usr/bin/msmtp")
+
+;; Choose account label to feed msmtp -a option based on From header
+;; in Message buffer; This function must be added to
+;; message-send-mail-hook for on-the-fly change of From address before
+;; sending message since message-send-mail-hook is processed right
+;; before sending message.
+(defun choose-msmtp-account ()
+  (if (message-mail-p)
+      (save-excursion
+        (let*
+            ((from (save-restriction
+                     (message-narrow-to-headers)
+                     (message-fetch-field "from")))
+             (account
+              (cond
+               ((string-match "antonio.dinarzo@mssm.edu" from) "mssm")
+               ((string-match "antonio.fabio@gmail.com" from) "gmail"))))
+          (setq message-sendmail-extra-arguments (list '"-a" account))
+          ))))
+(add-hook 'message-send-mail-hook 'choose-msmtp-account)
+
+(setq message-sendmail-envelope-from 'header)
+(setq message-sendmail-f-is-evil t)
