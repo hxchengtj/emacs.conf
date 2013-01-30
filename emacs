@@ -604,12 +604,15 @@ table determines which characters these are."
 of the message, MSG is the context. Optionally, you can provide an ICON"
 
   (interactive)
-  (if (eq window-system 'x)
-      (shell-command (concat "notify-send "
-                             (if icon (concat "-i " icon) "")
-                             " '" title "' '" msg "'"))
-    ;; text only version
-    (message (concat title ": " msg))))
+  (save-window-excursion
+    (if (eq window-system 'x)
+        (shell-command (concat "notify-send "
+                               (if icon (concat "-i " icon) "")
+                               " '" title "' '" msg "'"))
+      ;; text only version
+      (message (concat title ": " msg)))
+    (when sound (shell-command
+                 (concat "mplayer -really-quiet " sound " &> /dev/null &")))))
 
 ;;
 ;; E-MAIL
@@ -620,10 +623,19 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
 
   (setq
    mu4e-maildir "~/Maildir"
-   mu4e-sent-folder   "/Sent"
-   mu4e-drafts-folder "/Drafts"
-   mu4e-trash-folder  "/Trash"
-   mu4e-refile-folder "/Archives.2013")
+   mu4e-sent-folder   "/MSSM/Sent"
+   mu4e-drafts-folder "/MSSM/Drafts"
+   mu4e-trash-folder  "/MSSM/Trash"
+   mu4e-refile-folder "/MSSM/Archives.2013")
+
+  (add-to-list 'mu4e-bookmarks
+               '("maildir:/MSSM/INBOX"       "inbox"     ?i))
+
+  (add-hook 'mu4e-index-updated-hook
+    (lambda ()
+      (djcb-popup "mu4e" "you got mail"
+                  "/usr/share/icons/gnome/32x32/status/mail-unread.png"
+                  "/usr/share/sounds/ubuntu/stereo/message-new-instant.ogg")))
 
   (when
       (executable-find "html2text")
