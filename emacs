@@ -334,7 +334,7 @@ table determines which characters these are."
 (if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
 
 (if
-    (<= (x-display-pixel-height) 800) ;; small screen
+    (and window-system (<= (x-display-pixel-height) 800)) ;; small screen
     (setq MARGIN 20)
   (setq MARGIN 40))
 
