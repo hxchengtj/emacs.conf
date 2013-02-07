@@ -268,12 +268,12 @@
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
 
 ;; notmuch
-(add-to-list 'load-path "~/.emacs.d/notmuch")
-(setq notmuch-search-authors-width 40)
-(setq notmuch-search-oldest-first nil)
-(setq notmuch-command (executable-find "notmuch"))
-(require 'notmuch)
-(require 'org-notmuch)
+;; (add-to-list 'load-path "~/.emacs.d/notmuch")
+;; (setq notmuch-search-authors-width 40)
+;; (setq notmuch-search-oldest-first nil)
+;; (setq notmuch-command (executable-find "notmuch"))
+;; (require 'notmuch)
+;; (require 'org-notmuch)
 
 ;; ASCII editing utilities
 (autoload 'ascii-on        "ascii" "Turn on ASCII code display."   t)
