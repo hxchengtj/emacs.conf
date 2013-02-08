@@ -84,8 +84,8 @@
 (setq smooth-scroll-margin 5)
 
 (require 'color-theme)
-(load "~/.emacs.d/color-theme-almost-monokai.el")
-(load "~/.emacs.d/zenburn.el")
+(load "~/.emacs.d/color-theme-almost-monokai")
+(load "~/.emacs.d/zenburn")
 
 (defun colors-reset ()
   (interactive)
@@ -264,7 +264,7 @@
 ;;
 ;; writing
 ;;
-(when (file-exists-p "~/.emacs.d/thesaurus.api-key.el")
+(when (file-exists-p "~/.emacs.d/thesaurus.api-key")
   (require 'thesaurus)
   (load "~/.emacs.d/thesaurus.api-key.el")
   (define-key global-map (kbd "C-x t") 'thesaurus-choose-synonym-and-replace))
