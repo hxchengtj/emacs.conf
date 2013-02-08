@@ -1,4 +1,44 @@
 ;;
+;; PACKAGES
+;;
+(require 'package)
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/") t)
+
+;; (unless package-archive-contents    ;; Refrech the packages descriptions
+;;   (package-refresh-contents))
+
+;; (unless (package-installed-p 'org)  ;; Make sure the Org package is
+;;   (package-install 'org))           ;; installed, install it if not
+
+;; (unless (package-installed-p 'auctex)
+;;   (package-install 'auctex))
+
+;; (unless (package-installed-p 'ess)
+;;   (package-install 'ess))
+
+;; (unless (package-installed-p 'color-theme)
+;;   (package-install 'color-theme))
+
+;; (unless (package-installed-p 'bookmark+)
+;;   (package-install 'bookmark+))
+
+;; (unless (package-installed-p 'c-eldoc)
+;;   (package-install 'c-eldoc))
+
+;; (unless (package-installed-p 'dired+)
+;;   (package-install 'dired+))
+
+;; (unless (package-installed-p 'full-ack)
+;;   (package-install 'full-ack))
+
+;; (unless (package-installed-p 'ssh)
+;;   (package-install 'ssh))
+
+(setq package-load-list '(all))
+(package-initialize)
+
+;;
 ;; fonts etc.
 ;;
 (global-font-lock-mode t)
@@ -43,7 +83,6 @@
 (require 'smooth-scrolling)
 (setq smooth-scroll-margin 5)
 
-(add-to-list 'load-path "~/.emacs.d/color-theme")
 (require 'color-theme)
 (load "~/.emacs.d/color-theme-almost-monokai.el")
 (load "~/.emacs.d/zenburn.el")
@@ -156,7 +195,6 @@
 ;;
 ;; Bookmarks
 ;;
-(add-to-list 'load-path "~/.emacs.d/bookmark-plus")
 (require 'bookmark+)
 
 ;; FlySpell mode
@@ -171,7 +209,6 @@
 
 ;; ESS
 (setq user-full-name "\"Antonio, Fabio Di Narzo\"")
-(add-to-list 'load-path "~/.emacs.d/ess/lisp")
 (require 'ess-site)
 (require 'ess-R-object-tooltip)
 ;; (add-hook 'ess-mode-hook 'linum-on)
@@ -183,7 +220,6 @@
 ;;
 ;; AUCTEX
 ;;
-(add-to-list 'load-path "/usr/share/emacs/site-lisp")
 (when
     (require 'auctex nil 'noerror)
   (setq TeX-auto-save t)
@@ -239,9 +275,6 @@
 ;;
 ;; org mode
 ;;
-(add-to-list 'load-path "~/.emacs.d/org/lisp")
-(add-to-list 'load-path "~/.emacs.d/org/contrib/lisp")
-(require 'org-install)
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (setq org-replace-disputed-keys t)
 (setq org-agenda-files (list "~/GTD/gtd.org" "~/GTD/journal.org"))
