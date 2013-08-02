@@ -300,6 +300,7 @@
                ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
                ("\\paragraph{%s}" . "\\paragraph*{%s}")
                ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+(setq org-hierarchical-todo-statistics nil)
 
 ;; notmuch
 ;; (add-to-list 'load-path "~/.emacs.d/notmuch")
