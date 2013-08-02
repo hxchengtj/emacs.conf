@@ -119,6 +119,7 @@
 (setq dired-omit-files "^\\...+$")
 (add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1)))
 (setq dired-dwim-target t) ;; easier copying between folders
+(setq dired-recursive-deletes 'always)
 
 (defvar dired-sort-map (make-sparse-keymap))
 (define-key dired-mode-map "s" dired-sort-map)
