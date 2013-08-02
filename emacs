@@ -784,3 +784,12 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
 
 (setq message-sendmail-envelope-from 'header)
 (setq message-sendmail-f-is-evil t)
+
+(setq mail-signature
+"Antonio, Fabio Di Narzo
+Postdoc
+Icahn Institute for Genomics and Multiscale Biology
+Icahn School of Medicine at Mount Sinai
+One Gustave L. Levy Place - Box 1498
+New York, NY 10029-6574
+Ph: 212-659-8314")
