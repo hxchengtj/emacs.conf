@@ -538,6 +538,13 @@ table determines which characters these are."
 (add-hook 'c-mode-hook 'my-c-mode-hook)
 (global-set-key (kbd "M-s") (lambda () (interactive) (flymake-display-err-menu-for-current-line)))
 
+(defun indent-whole-buffer ()
+  "indent whole buffer"
+  (interactive)
+  (delete-trailing-whitespace)
+  (indent-region (point-min) (point-max) nil)
+  (untabify (point-min) (point-max)))
+
 ;; html
 (require 'hl-tags-mode)
 (add-hook 'sgml-mode-hook (lambda () (hl-tags-mode 1)))
