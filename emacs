@@ -669,6 +669,36 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
    mu4e-trash-folder  "/MSSM/Trash"
    mu4e-refile-folder "/MSSM/Archives.2013")
 
+  (setq mu4e-trash-folder
+        (lambda (msg)
+          ;; (print msg)
+          ;; (message "to:")
+          ;; (print (mu4e-message-field msg :to))
+          ;; (message "from:")
+          ;; (print (mu4e-message-field msg :from))
+          ;; (message "maildir:")
+          ;; (print (mu4e-message-field msg :maildir))
+          ;; (message "string-match ^/gmail:")
+          ;; (print (string-match (mu4e-message-field msg :maildir) "^/gmail"))
+          ;; (print (string-match "^/gmail" "/gmail/[Gmail].Tutti i messaggi"))
+          (cond
+           ((string-match "^/gmail" (mu4e-message-field msg :maildir))
+            "/gmail/[Gmail].Cestino")
+           ((string-match "^/MSSM" (mu4e-message-field msg :maildir))
+            "/MSSM/Trash")
+           (t  "/MSSM/Trash"))))
+
+  (setq mu4e-refile-folder
+        (lambda (msg)
+          (cond
+           ((mu4e-message-contact-field-matches msg :from "info@meetup.com")
+            "/MSSM/Meetup")
+           ((string-match (mu4e-message-field msg :maildir) "^/gmail")
+            "/gmail/[Gmail].Tutti i messaggi")
+           ((string-match (mu4e-message-field msg :maildir) "^/MSSM")
+            "/MSSM/Archives.2013")
+           (t  "/MSSM/Archives.2013"))))
+
   (add-to-list 'mu4e-bookmarks
                '("maildir:/MSSM/INBOX"       "inbox"     ?i))
 
