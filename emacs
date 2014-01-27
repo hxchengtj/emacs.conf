@@ -668,7 +668,7 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
    mu4e-sent-folder   "/MSSM/Sent"
    mu4e-drafts-folder "/MSSM/Drafts"
    mu4e-trash-folder  "/MSSM/Trash"
-   mu4e-refile-folder "/MSSM/Archives.2013")
+   mu4e-refile-folder "/MSSM/Archives.2014")
 
   (setq mu4e-trash-folder
         (lambda (msg)
@@ -697,17 +697,11 @@ of the message, MSG is the context. Optionally, you can provide an ICON"
            ((string-match (mu4e-message-field msg :maildir) "^/gmail")
             "/gmail/[Gmail].Tutti i messaggi")
            ((string-match (mu4e-message-field msg :maildir) "^/MSSM")
-            "/MSSM/Archives.2013")
-           (t  "/MSSM/Archives.2013"))))
+            "/MSSM/Archives.2014")
+           (t  "/MSSM/Archives.2014"))))
 
   (add-to-list 'mu4e-bookmarks
                '("maildir:/MSSM/INBOX"       "inbox"     ?i))
-
-  (add-hook 'mu4e-index-updated-hook
-    (lambda ()
-      (djcb-popup "mu4e" "you got mail"
-                  "/usr/share/icons/gnome/32x32/status/mail-unread.png"
-                  "/usr/share/sounds/ubuntu/stereo/message-new-instant.ogg")))
 
   (when
       (executable-find "html2text")
